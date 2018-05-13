@@ -2,7 +2,7 @@ from socket import *
 from threading import *
 import json
 
-class client_socket(object):
+class server_socket(object):
 	def __init__(self):
 		self.tcp_sock = socket(AF_INET, SOCK_STREAM)
 		self.udp_sock = socket(AF_INET, SOCK_DGRAM)
