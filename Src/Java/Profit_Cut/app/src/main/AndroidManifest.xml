@@ -16,6 +16,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".LogIn" />
+        <activity android:name=".SignUp" />
+        <activity android:name=".Menu" />
+        <activity android:name=".Vote" />
+        <activity android:name=".VoteList" />
+        <activity android:name=".VoteResult" />
+        <activity android:name=".CandiateList" />
+        <activity android:name=".CandidateInformation"></activity>
     </application>
 
 </manifest>
