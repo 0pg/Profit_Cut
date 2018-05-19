@@ -1,7 +1,7 @@
 import hashlib
 import json
 from math import log2
-from time import time
+from time import time, strptime, mktime
 from uuid import uuid4
 from collections import OrderedDict
 
@@ -11,7 +11,6 @@ class VoteChain(object):
 		self.chain = []
 		self.current_transactions = []
 		self.voters = set()
-
 	'''
 		체인의 첫번째 블록
 		:param
@@ -19,11 +18,16 @@ class VoteChain(object):
 		subject : 해당 블록 체인의 주제
 	'''
 
-	def genesis_block(self, constructor, subject):
+	def genesis_block(self, constructor, subject, dl):
+		dl = deadline(dl)
+		if dl:
+			return False
+
 		block_header = {
 			'index' : 1,
 			'constructor' : constructor,
 			'timestamp' : time(),
+			'deadline' : dl,
 		}
 		block_hash = self.hash(block_header)
 		block = {
@@ -59,11 +63,17 @@ class VoteChain(object):
 			'transactions' : self.current_transactions,
 			'merkle_tree' : self.merkle_tree,
 			}
-		self.current_transactions = []
-		self.chain.append(block)
-		
+		self.current_transactions = []		
 		return block
 	
+	'''
+		chain에 새로운 block 추가
+		:param
+		block : 추가할 block
+	'''
+	def add_block(self, block):
+		self.chain.append(block)
+
 	'''
 		투표 완료계정 확인
 		:params
@@ -83,19 +93,26 @@ class VoteChain(object):
 		return True
 
 	'''
-		새로운 거래내용 추가
+		새로운 transaction 생성
 		:param
-		voter : 투표자
-		candidate : 후보자
+		voter : 투표자 계정
+		candidate : 선택한 후보
 	'''
-
 	def new_transaction(self, voter, candidate):
-		self.current_transactions.append({
+		transac = {
 			'voter' : voter,
 			'choosen candidate' : candidate,
-			})
+			}
+		return transac
 
-		return self.last_block['block_header']['index'] + 1
+	'''
+		새로운 transaction 추가
+		:param
+		trnasac : 새로 추가할 transaction
+	'''
+	def add_transaction(self, transac):
+		if not check_voters(trasac['voter']):
+			self.current_transactions.append(transac)
 
 	'''
 		거래내용을 sha256 해시함수를 사용해 변환
@@ -154,6 +171,31 @@ class VoteChain(object):
 		return block_h
 
 	'''
+		chain에 새로 추가할 block의 유효성 검증
+		:param
+		block : chain에 추가할 block
+		chain : 새로운 block이 추가될 chain
+	'''
+	def valid_block(self, block, chain):
+		genesis_h = chain[0]['block_header']
+		last_h = self.last_block['block_header']
+		block_h = block['block_header']
+
+		if block_h['timestamp'] > genesis_h['deadline']:
+			return False
+
+		if block_h['index'] != last_h['index'] + 1:
+			return False
+
+		if not self.valid_proof(block_h):
+			return False
+
+		if block_h['previous_hash'] != hash(last_h):
+			return False
+
+		return True
+
+	'''
 		블럭체인이 유효한지 검증하는 과정
 		:param
 		chain : 현재 블럭들이 포함된 리스트
@@ -175,6 +217,9 @@ class VoteChain(object):
 			if not self.valid_proof(block_h):
 				return False
 
+			if block_h['timestamp'] > chain[0]['block_header']['deadline']
+				return False
+			
 			last_block = block
 			current_index += 1
 		
@@ -182,16 +227,15 @@ class VoteChain(object):
 
 	'''
 		블럭이 분기되었을 때 충돌을 해결. 연결된 블럭의 길이가 긴 쪽의 체인이 유지된다.
+		:param
+		chainlist : 여러 체인들이 들어있는 리스트
 	'''
-	def resolve_conflicts(self, new_chain):
-		max_length = len(self.chain)
-		length = len(new_chain)
-
-		if length > max_length and self.valid_chain(new_chain):
-			self.chain = new_chain
-			return True
-
-		return False
+	def resolve_conflicts(self, chainlist):
+		for new_chain in chainlist:
+			max_length = len(self.chain)
+			length = len(new_chain)
+			if length > max_length and self.valid_chain(new_chain):
+				self.chain = new_chain
 
 	'''
 		블럭의 해시값을 구하는 과정. 해시값의 첫 4자리가 '0000'이면 적합한 것으로 함
@@ -208,13 +252,34 @@ class VoteChain(object):
 			return False
 
 	'''
+		투표 종료 시간을 받아 epoch time으로 변환뒤 반환하는 함수
+		:param
+		dl : "년도 월 일 시간" 형태로 투표 종료 시간을 받음
+	'''
+	def deadline(self, dl):
+		try:
+			dl = strptime("%Y %m %d %H", dl)
+			t = gmtime()
+			if dl.tm_year < t.tm_year:
+				return False
+			if dl.tm_mon > 12 or dl.tm_mon < 1 or ((dl.tm_year == t.tm_year) and (dl.tm_mon < t.tm_mon)):
+				return False
+			if dl.tm_mday > 31 or dl.tm_mday < 1 or ((dl.tm_mon == t.tm_mon) and (dl.tm_mday < t.tm_mday)):
+				return False
+			if dl.tm_hour > 23 or dl.tm_hour < 0 or ((dl.tm_mday == t.tm_mday) and (dl.tm_hour < t.tm_hour)):
+				return False
+			return mktime(dl)
+		except:
+			return False
+
+	'''
 		인자로 넘어온 값의 sha256 해시를 반환
 	'''
 	@staticmethod
 	def hash(key):
 		key_string = json.dumps(key, sort_keys=True).encode()
 		return hashlib.sha256(key_string).hexdigest()
-
+	
 	'''
 		현재 체인의 끝 블록을 반환
 	'''
@@ -225,6 +290,10 @@ class VoteChain(object):
 	def test(self):
 		print(self.chain)
 
+
+t = VoteChain()
+t.deadline = '2018 5 20 22'
+print(t.deadline)
 '''
 chain = VoteChain()
 chain.test()
