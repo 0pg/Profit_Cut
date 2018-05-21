@@ -55,7 +55,7 @@ class VoteChain(object):
 			'previous_hash' : self.chain[-1]['block_hash'],
 			'merkle_root': self.merkle_tree[1],
 		}
-		block_header = self.proof_of_work(block_header)
+		block_header = self.calculate_proof(block_header)
 		block_hash = self.hash(block_header)
 		block = {
 			'block_hash' : block_hash,
@@ -160,15 +160,26 @@ class VoteChain(object):
 				merkle_tree[1] = self.hash(transactions)
 				return merkle_tree
 	'''
-		블럭체인의 nonce 값을 구하는 과정. proof 값을 1씩 증가시키며 적합한 해시값을 찾을 때 까지 반복
+		블럭체인의 nonce 값을 구하는 과정. 원하는 값이 아니면 proof 값을 1씩 증가시킨다
 		:param
 		block_h : 블럭의 헤더정보
 	'''
 	def proof_of_work(self, block_h):
-		while self.valid_proof(block_h) is False:
+		if self.valid_proof(block_h) is False:
 			block_h['proof'] += 1
+			return False
 
 		return block_h
+
+	'''
+		transaction이 추가됨에 따라 바뀐 merkle_root 값을 업데이트 하여 proof 계산
+		:param
+		block_h : 블럭의 헤더정보
+	'''
+	def calculate_proof(self, block_h):
+		while proof_of_work:
+			if block_h['merkle_root'] != self.merkle_tree[1]:
+				block_h['merkle_root'] = self.merkle_tree[1]
 
 	'''
 		chain에 새로 추가할 block의 유효성 검증
