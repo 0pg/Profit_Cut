@@ -213,7 +213,7 @@ class vote_chain {
 	}
 }
 
-public class vote_block {
+class vote_block {
 	LinkedHashMap<Integer, String> merkle_tree;
 	ArrayList<HashMap> current_transactions;
 	ArrayList<String> voters;
