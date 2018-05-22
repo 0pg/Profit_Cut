@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
+
 class genesisblock_header {
 	private String ver;
 	private int index;
@@ -138,10 +139,10 @@ class block{
 	private block_header block_h;
 
 	
-	public block(String block_hash, ArrayList<HashMap> transaction_pool, HashMap<Integer, String> merkle_tree,
+	public block(ArrayList<HashMap> transaction_pool, HashMap<Integer, String> merkle_tree,
 			block_header block_h) {
 		super();
-		this.block_hash = block_hash;
+		this.block_hash = vote_block.hash(block_h.toString());
 		this.transaction_pool = transaction_pool;
 		this.merkle_tree = merkle_tree;
 		this.block_h = block_h;
@@ -170,22 +171,9 @@ class block{
 				+ merkle_tree.toString() + "]";
 	}
 }
-
-public class vote_block {
-	LinkedHashMap<Integer, String> merkle_tree;
+class vote_chain {
 	ArrayList<Object> chain;
-	ArrayList<HashMap> current_transactions;
-	ArrayList<String> voters;
-
-	public vote_block(LinkedHashMap<Integer, String> merkle_tree, ArrayList<Object> chain,
-			ArrayList<HashMap> current_transactions, ArrayList<String> voters) {
-		super();
-		this.merkle_tree = merkle_tree;
-		this.chain = chain;
-		this.current_transactions = current_transactions;
-		this.voters = voters;
-	}
-
+	
 	public void add_genesis(genesisblock genesis) {
 		this.chain.add(0, genesis);
 	}
@@ -194,6 +182,62 @@ public class vote_block {
 		this.chain.add(block);
 	}
 	
+	public boolean valid_chain(ArrayList<Object> chain) {
+		genesisblock genesis = (genesisblock) chain.get(0);
+		block last_block = (block)chain.get(1);
+		int current_index = 2;
+		
+		while(current_index < chain.size()) {
+			block block = (block)chain.get(current_index);
+			block_header block_h = block.getBlock_h();
+			
+			if(block_h.getPrevious_hash() != vote_block.hash(last_block.toString())) return false;
+			if(vote_block.valid_proof(block_h) == "false") return false;
+			if(block_h.getTime() > ((genesisblock_header)chain.get(0)).getDeadline()) return false;
+			
+			last_block = block;
+			current_index += 1;
+		}
+		
+		return true;
+	}
+	
+	public void reslove_conflicts(ArrayList<ArrayList> chainlist) {
+		for(ArrayList new_chain : chainlist) {
+			int max_length = this.chain.size();
+			int length = new_chain.size();
+			if(length > max_length && valid_chain(new_chain)) {
+				this.chain = new_chain;
+			}
+		}
+	}
+}
+
+public class vote_block {
+	LinkedHashMap<Integer, String> merkle_tree;
+	ArrayList<HashMap> current_transactions;
+	ArrayList<String> voters;
+
+	public void setMerkle_tree(LinkedHashMap<Integer, String> merkle_tree) {
+		this.merkle_tree = merkle_tree;
+	}
+
+	public void setCurrent_transactions(ArrayList<HashMap> current_transactions) {
+		this.current_transactions = current_transactions;
+	}
+
+	public void setVoters(ArrayList<String> voters) {
+		this.voters = voters;
+	}
+
+	public vote_block(LinkedHashMap<Integer, String> merkle_tree,
+			ArrayList<HashMap> current_transactions, ArrayList<String> voters) {
+		super();
+		this.merkle_tree = merkle_tree;
+		this.current_transactions = current_transactions;
+		this.voters = voters;
+	}
+
 	public void update_voters(String voter) {
 		this.voters.add(voter);
 	}
@@ -221,30 +265,10 @@ public class vote_block {
 		}
 	}
 	
-	public boolean valid_chain(ArrayList<Object> chain) {
-		genesisblock genesis = (genesisblock) chain.get(0);
-		block last_block = (block)chain.get(1);
-		int current_index = 2;
-		
-		while(current_index < chain.size()) {
-			block block = (block)chain.get(current_index);
-			block_header block_h = block.getBlock_h();
-			
-			if(block_h.getPrevious_hash() != hash(last_block.toString())) return false;
-			if(valid_proof(block_h) == "false") return false;
-			if(block_h.getTime() > ((genesisblock_header)chain.get(0)).getDeadline()) return false;
-			
-			last_block = block;
-			current_index += 1;
-		}
-		
-		return true;
-	}
-	
 	public boolean valid_block(block block, ArrayList<Object> chain) {
 		genesisblock_header genesis_h = (genesisblock_header)chain.get(0);
 		block_header block_h = block.getBlock_h();
-		block_header last_h = last_block().getBlock_h();
+		block_header last_h = last_block(chain).getBlock_h();
 		
 		if(block_h.getTime() > genesis_h.getDeadline()) return false;
 		if(block_h.getIndex() != last_h.getIndex()+1) return false;
@@ -252,7 +276,7 @@ public class vote_block {
 		if(block_h.getPrevious_hash() != hash(last_h.toString())) return false;
 		
 		return true;
-	}
+	} 
 	
 	public block_header proof_of_work(block_header block_h) {
 		if(valid_proof(block_h) == "false") {
@@ -267,16 +291,6 @@ public class vote_block {
 			return guess_hash;
 		else return "false";
 		
-	}
-	
-	public void reslove_conflicts(ArrayList<ArrayList> chainlist) {
-		for(ArrayList new_chain : chainlist) {
-			int max_length = this.chain.size();
-			int length = new_chain.size();
-			if(length > max_length && valid_chain(new_chain)) {
-				this.chain = new_chain;
-			}
-		}
 	}
 	
 	public float deadline(int year, int month, int day, int hour) {
@@ -334,12 +348,13 @@ public class vote_block {
 		}
 	}	
 	
-	public void calculate_proof(block_header block_h) {
-		while(proof_of_work(block_h) == null) {
+	public block_header calculate_proof(block_header block_h) {
+		while((proof_of_work(block_h)) == null) {
 			if(block_h.getMerkle_root() != this.merkle_tree.get(1)) {
 				block_h.setMerkle_root(this.merkle_tree.get(1));
 			}
 		}
+		return block_h;
 	}
 	
 	public static double baseLog(double x, double base) {
@@ -363,16 +378,8 @@ public class vote_block {
 		}
 		return hexString.toString();
 	}
-	private block last_block() {
-		return (block)this.chain.get(chain.size()-1);
+	private block last_block(ArrayList<Object> chain) {
+		return (block)chain.get(chain.size()-1);
 	}
-
-	
-	@Override
-	public String toString() {
-		return "["+chain.toString()+"]";
-	}
-
-	
 
 }
