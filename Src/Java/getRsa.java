@@ -39,7 +39,7 @@ public class getRsa {
 		return keyPairGenerator.genKeyPair();
 	}
 	
-	private Key get_public() {
+	public Key get_public() {
 		return this.keypair.getPublic();
 	}
 	
@@ -65,29 +65,34 @@ public class getRsa {
 		return arrCipherData;
 	}
 	
-	public String decryption(byte[] encrypted, String key) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidKeySpecException {
-		KeyPair keypair = get_keyPair();
-		Key publickey = decode_publickey(key);
-		this.cipher.init(Cipher.DECRYPT_MODE, publickey);
-		byte[] arrCipherData = this.cipher.doFinal(encrypted);
-		String decrypted = new String(arrCipherData);
-		
-		return decrypted;
+	public String decryption(String encrypted, String key) {
+		try {
+			KeyPair keypair = get_keyPair();
+			Key publickey = decode_publickey(key);
+			byte[] encrypt = decode_base64(encrypted);
+			this.cipher.init(Cipher.DECRYPT_MODE, publickey);
+			byte[] arrCipherData = this.cipher.doFinal(encrypt);
+			String decrypted = new String(arrCipherData);
+			
+			return decrypted;
+		} catch (Exception e) {
+			return "false";
+		}
 	}
 	
-	public Key decode_publickey(String key) throws InvalidKeySpecException {
+	private Key decode_publickey(String key) throws InvalidKeySpecException {
 		X509EncodedKeySpec x509Spec = new X509EncodedKeySpec(decode_base64(key)); 
 		PublicKey pk = this.keyFactory.generatePublic(x509Spec);
 		return pk;
 	}
 	
-	public String encode_base64(byte[] key) {
+	private String encode_base64(byte[] key) {
 		Encoder encoder = Base64.getEncoder();
 		String base64 = encoder.encodeToString(key);
 		return base64;
 	}
 	
-	public byte[] decode_base64(String key) {
+	private byte[] decode_base64(String key) {
 		Decoder decoder = Base64.getDecoder();
 		byte[] base64 = decoder.decode(key);
 		return base64;

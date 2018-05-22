@@ -1,12 +1,16 @@
 package votechain;
 
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
+import javax.crypto.NoSuchPaddingException;
+
+import votechain.getRsa;
 
 class genesisblock_header {
 	private String ver;
@@ -258,11 +262,14 @@ class vote_block {
 		return transac;
 	}
 	
-	public void add_transaction(HashMap<String, String> transac) {
+	public boolean add_transaction(HashMap<String, String> transac, String encrypted, String key, getRsa rsa) throws NoSuchAlgorithmException, NoSuchPaddingException {
+		if(rsa.decryption(encrypted, key) == "false") return false;
 		if(!check_voters(transac.get("voter"))) {
 			this.current_transactions.add(transac);
 			this.merkle_tree = transaction_record();
+			update_voters(transac.get("voter"));
 		}
+		return true;
 	}
 	
 	public boolean valid_block(block block, ArrayList<Object> chain) {
