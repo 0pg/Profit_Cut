@@ -20,7 +20,8 @@
         <activity android:name=".VoteParticipationActivity" />
         <activity android:name=".VoteActivity" />
         <activity android:name=".MenuActivity" />
-        <activity android:name=".VotingStateActivity"></activity>
+        <activity android:name=".VotingStateActivity" />
+        <activity android:name=".CheckChainActivity"></activity>
     </application>
 
 </manifest>

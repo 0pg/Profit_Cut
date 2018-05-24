@@ -17,4 +17,9 @@ public class MenuActivity extends AppCompatActivity {
         Intent StateIntent = new Intent(MenuActivity.this, VotingStateActivity.class);
         startActivity(StateIntent);
     }
+
+    public void onButtonCheck(View view) {
+        Intent CheckIntent = new Intent(MenuActivity.this, CheckChainActivity.class);
+        startActivity(CheckIntent);
+    }
 }
