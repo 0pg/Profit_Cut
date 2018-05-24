@@ -6,4 +6,106 @@
     android:layout_height="match_parent"
     tools:context=".VoteActivity">
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@color/colorPrimaryDark">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="컴퓨터과학과 학생회 투표"
+                android:textColor="#ffffff"
+                android:textSize="30dp"
+                android:textStyle="bold"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"/>
+        </LinearLayout>
+
+        <TableLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#ffffff"
+            android:padding="8dp"
+            android:stretchColumns="*"
+            android:layout_marginTop="50dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp">
+
+            <TableRow
+                android:background="#ffffff"
+                android:padding="8dp"
+                android:stretchColumns="*">
+                <TextView
+                    android:layout_gravity="center"
+                    android:textSize="20dp"
+                    android:textColor="#000000"
+                    android:text="1"
+                    android:layout_margin="1dp"/>
+
+                <TextView
+                    android:layout_marginLeft="10dp"
+                    android:layout_gravity="center"
+                    android:textSize="20dp"
+                    android:textColor="#000000"
+                    android:text="임현"
+                    android:layout_margin="1dp"/>
+
+                <CheckBox
+                    android:layout_marginLeft="10dp"
+                    android:layout_margin="1dp" />
+            </TableRow>
+
+            <TableRow
+                android:background="#ffffff"
+                android:padding="8dp"
+                android:stretchColumns="*">
+                <TextView
+                    android:layout_gravity="center"
+                    android:textSize="20dp"
+                    android:textColor="#000000"
+                    android:text="2"
+                    android:layout_margin="1dp"/>
+
+                <TextView
+                    android:layout_marginLeft="10dp"
+                    android:layout_gravity="center"
+                    android:textSize="20dp"
+                    android:textColor="#000000"
+                    android:text="김자훈"
+                    android:layout_margin="1dp"/>
+
+                <CheckBox
+                    android:layout_marginLeft="10dp"
+                    android:layout_margin="1dp" />
+            </TableRow>
+
+        </TableLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="100dp">
+
+            <Button
+                android:layout_width="280dp"
+                android:layout_height="wrap_content"
+                android:textSize="20dp"
+                android:textStyle="bold"
+                android:textColor="#ffffff"
+                android:background="@color/colorPrimaryDark"
+                android:text="투표 완료"
+                android:layout_marginTop="10dp"
+                android:layout_gravity="center" />
+        </LinearLayout>
+    </LinearLayout>
+
 </android.support.constraint.ConstraintLayout>
