@@ -57,7 +57,7 @@
                 android:layout_gravity="center"
                 android:layout_marginTop="10dp"
                 android:background="@color/colorPrimaryDark"
-                android:onClick="onButtonParticipation"
+                android:onClick="onButtonAuthentication"
                 android:text="사용자 인증"
                 android:textColor="#ffffff"
                 android:textSize="20dp"

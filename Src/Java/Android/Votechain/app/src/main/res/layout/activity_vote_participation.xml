@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ParticipationVoteActivity">
+    tools:context=".VoteParticipationActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -54,6 +54,7 @@
                 android:textStyle="bold"
                 android:textColor="#ffffff"
                 android:background="@color/colorPrimaryDark"
+                android:onClick="onButtonParticipation"
                 android:text="투표 참여"
                 android:layout_marginTop="10dp"
                 android:layout_gravity="center" />

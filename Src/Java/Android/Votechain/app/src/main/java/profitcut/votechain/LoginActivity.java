@@ -13,8 +13,8 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
     }
 
-    public void onButtonParticipation(View view) {
-        Intent ParticipationIntent = new Intent(getApplicationContext(), ParticipationVoteActivity.class);
+    public void onButtonAuthentication(View view) {
+        Intent ParticipationIntent = new Intent(LoginActivity.this, VoteParticipationActivity.class);
         startActivity(ParticipationIntent);
     }
 }
