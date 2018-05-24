@@ -19,7 +19,8 @@
         <activity android:name=".MainActivity" />
         <activity android:name=".VoteParticipationActivity" />
         <activity android:name=".VoteActivity" />
-        <activity android:name=".MenuActivity"></activity>
+        <activity android:name=".MenuActivity" />
+        <activity android:name=".VotingStateActivity"></activity>
     </application>
 
 </manifest>

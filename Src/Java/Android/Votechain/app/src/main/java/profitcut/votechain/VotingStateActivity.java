@@ -5,16 +5,16 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 
-public class MenuActivity extends AppCompatActivity {
+public class VotingStateActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_menu);
+        setContentView(R.layout.activity_voting_state);
     }
 
-    public void onButtonState(View view) {
-        Intent StateIntent = new Intent(MenuActivity.this, VotingStateActivity.class);
-        startActivity(StateIntent);
+    public void onButtonMenu(View view) {
+        Intent MenuIntent = new Intent(VotingStateActivity.this, MenuActivity.class);
+        startActivity(MenuIntent);
     }
 }
