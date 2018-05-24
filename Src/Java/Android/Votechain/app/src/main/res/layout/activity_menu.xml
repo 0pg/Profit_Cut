@@ -62,13 +62,14 @@
             <Button
                 android:layout_width="200dp"
                 android:layout_height="wrap_content"
-                android:textSize="20dp"
-                android:textStyle="bold"
-                android:textColor="#000000"
-                android:background="@color/colorPrimary"
-                android:text="다른 투표하기"
+                android:layout_gravity="center"
                 android:layout_marginTop="35dp"
-                android:layout_gravity="center" />
+                android:background="@color/colorPrimary"
+                android:onClick="onButtonParticipation"
+                android:text="다른 투표"
+                android:textColor="#000000"
+                android:textSize="20dp"
+                android:textStyle="bold" />
         </LinearLayout>
     </LinearLayout>
 

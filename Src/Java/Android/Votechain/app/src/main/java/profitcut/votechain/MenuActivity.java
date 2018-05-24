@@ -22,4 +22,9 @@ public class MenuActivity extends AppCompatActivity {
         Intent CheckIntent = new Intent(MenuActivity.this, CheckChainActivity.class);
         startActivity(CheckIntent);
     }
+
+    public void onButtonParticipation(View view) {
+        Intent ParticipationIntent = new Intent(MenuActivity.this, VoteParticipationActivity.class);
+        startActivity(ParticipationIntent);
+    }
 }
