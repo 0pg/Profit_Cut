@@ -33,20 +33,19 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
-            android:layout_marginTop="80dp">
+            android:layout_marginTop="100dp">
 
             <EditText
                 android:layout_width="280dp"
                 android:layout_height="wrap_content"
-                android:hint="투표 이름 입력"
+                android:hint="투표 이름 입력 (정확히 입력)"
                 android:layout_gravity="center"
                 android:padding="10dp"
                 android:textColor="#ffffff"
                 android:textColorHint="#ffffff"
                 android:id="@+id/vote_name_Text"
                 android:layout_marginTop="50dp"
-                android:background="@color/colorPrimaryDark"
-                />
+                android:background="@color/colorPrimaryDark" />
 
             <Button
                 android:layout_width="280dp"
@@ -55,9 +54,9 @@
                 android:textStyle="bold"
                 android:textColor="#ffffff"
                 android:background="@color/colorPrimaryDark"
-                android:text="사용자 인증"
+                android:text="투표 참여"
                 android:layout_marginTop="10dp"
-                android:layout_gravity="center"/>
+                android:layout_gravity="center" />
         </LinearLayout>
     </LinearLayout>
 
