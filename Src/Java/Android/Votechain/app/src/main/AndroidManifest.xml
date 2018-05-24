@@ -18,7 +18,8 @@
         </activity>
         <activity android:name=".MainActivity" />
         <activity android:name=".VoteParticipationActivity" />
-        <activity android:name=".VoteActivity"></activity>
+        <activity android:name=".VoteActivity" />
+        <activity android:name=".MenuActivity"></activity>
     </application>
 
 </manifest>

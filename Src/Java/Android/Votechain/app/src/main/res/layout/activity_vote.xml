@@ -98,13 +98,14 @@
             <Button
                 android:layout_width="280dp"
                 android:layout_height="wrap_content"
-                android:textSize="20dp"
-                android:textStyle="bold"
-                android:textColor="#ffffff"
-                android:background="@color/colorPrimaryDark"
-                android:text="투표 완료"
+                android:layout_gravity="center"
                 android:layout_marginTop="10dp"
-                android:layout_gravity="center" />
+                android:background="@color/colorPrimaryDark"
+                android:onClick="onButtonVote"
+                android:text="투표 완료"
+                android:textColor="#ffffff"
+                android:textSize="20dp"
+                android:textStyle="bold" />
         </LinearLayout>
     </LinearLayout>
 

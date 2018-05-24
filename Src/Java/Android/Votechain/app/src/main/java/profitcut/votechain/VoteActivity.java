@@ -12,4 +12,9 @@ public class VoteActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_vote);
     }
+
+    public void onButtonVote(View view) {
+        Intent MenuIntent = new Intent(VoteActivity.this, MenuActivity.class);
+        startActivity(MenuIntent);
+    }
 }
