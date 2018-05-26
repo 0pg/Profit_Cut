@@ -13,6 +13,11 @@ public class MenuActivity extends AppCompatActivity {
         setContentView(R.layout.activity_menu);
     }
 
+    public void onButtonVote(View view) {
+        Intent VoteIntent = new Intent(MenuActivity.this, VoteActivity.class);
+        startActivity(VoteIntent);
+    }
+
     public void onButtonState(View view) {
         Intent StateIntent = new Intent(MenuActivity.this, VotingStateActivity.class);
         startActivity(StateIntent);

@@ -54,7 +54,7 @@
                 android:textStyle="bold"
                 android:textColor="#ffffff"
                 android:background="@color/colorPrimaryDark"
-                android:onClick="onButtonParticipation"
+                android:onClick="onButtonMenu"
                 android:text="투표 참여"
                 android:layout_marginTop="10dp"
                 android:layout_gravity="center" />

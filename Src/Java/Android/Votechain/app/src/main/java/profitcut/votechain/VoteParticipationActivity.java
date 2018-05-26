@@ -17,15 +17,15 @@ public class VoteParticipationActivity extends AppCompatActivity {
         setContentView(R.layout.activity_vote_participation);
     }
 
-    public void onButtonParticipation(View view) {
-        Intent VoteIntent = new Intent(VoteParticipationActivity.this, VoteActivity.class);
+    public void onButtonMenu(View view) {
+        Intent MenuIntent = new Intent(VoteParticipationActivity.this, MenuActivity.class);
 
         String subject = "컴퓨터과학과";
 
         openDatabase();
         createTable(subject);
 
-        startActivity(VoteIntent);
+        startActivity(MenuIntent);
     }
 
     private void openDatabase() {
