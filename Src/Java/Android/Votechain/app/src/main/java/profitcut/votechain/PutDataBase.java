@@ -106,4 +106,22 @@ public class PutDataBase extends AppCompatActivity {
 
         db.update(name, recordValues, "id = ?", whereArgs);
     }
+
+    public void deleteChain(String name, int idx) {
+        String [] whereArgs = {Integer.toString(idx)};
+
+        db.delete(name, "idx = ?", whereArgs);
+    }
+
+    public void deleteTransactionPool(String name, int idx) {
+        String [] whereArgs = {Integer.toString(idx)};
+
+        db.delete(name, "idx = ?", whereArgs);
+    }
+
+    public void deleteMerkleTree(String name, int idx) {
+        String [] whereArgs = {Integer.toString(idx)};
+
+        db.delete(name, "idx = ?", whereArgs);
+    }
 }
