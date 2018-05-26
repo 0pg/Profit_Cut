@@ -21,7 +21,8 @@
         <activity android:name=".VoteActivity" />
         <activity android:name=".MenuActivity" />
         <activity android:name=".VotingStateActivity" />
-        <activity android:name=".CheckChainActivity"></activity>
+        <activity android:name=".CheckChainActivity" />
+        <activity android:name=".TestActivity"></activity>
     </application>
 
 </manifest>

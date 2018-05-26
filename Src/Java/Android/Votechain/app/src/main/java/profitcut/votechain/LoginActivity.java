@@ -18,10 +18,17 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
     }
 
+    /*
+    public void onButtonTest(View view) {
+        Intent TestIntent = new Intent(LoginActivity.this, TestActivity.class);
+        startActivity(TestIntent);
+    }*/
+
     public void onButtonAuthentication(View view) {
         Intent ParticipationIntent = new Intent(LoginActivity.this, VoteParticipationActivity.class);
 
         createDatabase();
+        user_infoTable();
 
         startActivity(ParticipationIntent);
     }
@@ -39,5 +46,15 @@ public class LoginActivity extends AppCompatActivity {
         } catch (Exception ex) {
             Toast.makeText(getApplicationContext(), "" + name + " Database 생성 오류", Toast.LENGTH_LONG). show();
         }
+    }
+
+    private void user_infoTable() {
+        String name = "_user_info";
+        db.execSQL("create table if not exists " + name + "("
+                + " id integer not null, "
+                + " pk text not null, "
+                + " token integer not null, "
+                + " primary key(id));"
+        );
     }
 }

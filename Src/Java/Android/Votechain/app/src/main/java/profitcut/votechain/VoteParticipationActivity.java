@@ -27,7 +27,8 @@ public class VoteParticipationActivity extends AppCompatActivity {
 
         Intent MenuIntent = new Intent(VoteParticipationActivity.this, MenuActivity.class);
 
-        if (vote_name.equals("컴퓨터과학과")) {
+        if (vote_name.equals("")) {
+        // if (vote_name.equals("컴퓨터과학과")) {
             String subject = vote_name;
 
             openDatabase();
@@ -52,22 +53,11 @@ public class VoteParticipationActivity extends AppCompatActivity {
     }
 
     private void createTable(String subject) {
-        createuser_infoTable(subject);
         createchainTable(subject);
         createtransaction_poolTable(subject);
         createmerkle_treeTable(subject);
         createvotersTable(subject);
         createcandidatesTable(subject);
-    }
-
-    private void createuser_infoTable(String subject) {
-        String name = subject + "_user_info";
-        db.execSQL("create table if not exists " + name + "("
-        + " id integer not null, "
-        + " pk text not null, "
-        + " token integer not null, "
-        + " primary key(id));"
-        );
     }
 
     private void createchainTable(String subject) {
