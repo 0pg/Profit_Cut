@@ -26,7 +26,7 @@ public class PutDataBase extends AppCompatActivity {
         }
     }
 
-    public void insertUserInfo(String name, int id, String pk, int token) {
+    public void insertUserInfo(String name, String id, String pk, int token) {
         ContentValues recordValues = new ContentValues();
 
         recordValues.put("id", id);
@@ -87,5 +87,23 @@ public class PutDataBase extends AppCompatActivity {
         recordValues.put("candidate", candidate);
 
         db.insert(name, null, recordValues);
+    }
+
+    /**
+     * @title : public void updateUserInfo(String name, String id, int token)
+     * @author : 임현 (hyunzion@gmail.com)
+     * @since : 2018 - 05 - 26
+     * @brief : user_info table을 update하기 위한 함수
+     * @param : - String name : 테이블 명 (예 : user_info)
+                 - String id : 변경의 기준이 될 id
+                 - int token : 변경할 token
+     */
+    public void updateUserInfo(String name, String id, int token) {
+        ContentValues recordValues = new ContentValues();
+
+        recordValues.put("token", token);
+        String[] whereArgs = {id};
+
+        db.update(name, recordValues, "id = ?", whereArgs);
     }
 }
