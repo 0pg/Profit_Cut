@@ -10,8 +10,6 @@ import android.widget.Toast;
 
 public class LoginActivity extends AppCompatActivity {
 
-    boolean databaseCreated = false;
-
     SQLiteDatabase db;
 
     @Override
@@ -37,7 +35,6 @@ public class LoginActivity extends AppCompatActivity {
                     Activity.MODE_PRIVATE,
                     null);
 
-            databaseCreated = true;
             Toast.makeText(getApplicationContext(), "" + name + " Database 생성 ", Toast.LENGTH_LONG). show();
         } catch (Exception ex) {
             Toast.makeText(getApplicationContext(), "" + name + " Database 생성 오류", Toast.LENGTH_LONG). show();
