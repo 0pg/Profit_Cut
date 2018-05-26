@@ -49,9 +49,9 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void user_infoTable() {
-        String name = "_user_info";
+        String name = "user_info";
         db.execSQL("create table if not exists " + name + "("
-                + " id integer not null, "
+                + " id text not null, "
                 + " pk text not null, "
                 + " token integer not null, "
                 + " primary key(id));"
