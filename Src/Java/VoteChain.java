@@ -1,16 +1,10 @@
 package votechain;
 
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-
-import javax.crypto.NoSuchPaddingException;
-
-import votechain.getRsa;
 
 class genesisblock_header {
 	private String ver;
@@ -48,14 +42,20 @@ class genesisblock {
 	private String block_hash;
 	private String subject;
 	private String constructor;
+	private ArrayList<String> candidates;
 	private genesisblock_header genesis_h;
 
-	public genesisblock(String block_hash, String constructor,String subject, genesisblock_header genesis_h) {
+	public genesisblock(String constructor,String subject, ArrayList candidates, genesisblock_header genesis_h) {
 		super();
-		this.block_hash = block_hash;
+		this.block_hash = vote_block.hash(genesis_h.toString());
 		this.subject = subject;
 		this.constructor = constructor;
+		this.candidates = candidates;
 		this.genesis_h = genesis_h;
+	}
+
+	public ArrayList<String> getCandidates() {
+		return candidates;
 	}
 
 	public String getBlock_hash() {
@@ -81,7 +81,7 @@ class genesisblock {
 	@Override
 	public String toString() {
 		return "[genesis_header=" + genesis_h.toString() + ", block_hash=" + block_hash + ", subject=" + subject + ", constructor=" + constructor
-				+ "]";
+				+ ", candidates="+candidates.toString()+ "]";
 	}
 	
 	
@@ -129,6 +129,8 @@ class block_header {
 	public void setProof(int proof) {
 		this.proof += proof;
 	}
+	
+
 	@Override
 	public String toString() {
 		return "[ver=" + ver + ", index=" + index + ", proof=" + proof + ", time=" + time
@@ -178,13 +180,18 @@ class block{
 class vote_chain {
 	ArrayList<Object> chain;
 	
+	public vote_chain(ArrayList<Object> chain) {
+		super();
+		this.chain = chain;
+	}
+
 	public void add_genesis(genesisblock genesis) {
 		this.chain.add(0, genesis);
 	}
 	
 	public void add_block(block block) {
-		this.chain.add(block);
-	}
+			this.chain.add(block);
+		}
 	
 	public boolean valid_chain(ArrayList<Object> chain) {
 		genesisblock genesis = (genesisblock) chain.get(0);
@@ -196,7 +203,7 @@ class vote_chain {
 			block_header block_h = block.getBlock_h();
 			
 			if(block_h.getPrevious_hash() != vote_block.hash(last_block.toString())) return false;
-			if(vote_block.valid_proof(block_h) == "false") return false;
+			if(!vote_block.valid_proof(block_h)) return false;
 			if(block_h.getTime() > ((genesisblock_header)chain.get(0)).getDeadline()) return false;
 			
 			last_block = block;
@@ -221,24 +228,25 @@ class vote_block {
 	LinkedHashMap<Integer, String> merkle_tree;
 	ArrayList<HashMap> current_transactions;
 	ArrayList<String> voters;
+	HashMap<String, HashMap> users;
 
-	public void setMerkle_tree(LinkedHashMap<Integer, String> merkle_tree) {
+
+	
+	
+	public vote_block(LinkedHashMap<Integer, String> merkle_tree, ArrayList<HashMap> current_transactions,
+			ArrayList<String> voters, HashMap<String, HashMap> users) {
+		super();
 		this.merkle_tree = merkle_tree;
+		this.current_transactions = current_transactions;
+		this.voters = voters;
+		this.users = users;
 	}
 
 	public void setCurrent_transactions(ArrayList<HashMap> current_transactions) {
 		this.current_transactions = current_transactions;
 	}
 
-	public void setVoters(ArrayList<String> voters) {
-		this.voters = voters;
-	}
-
-	public vote_block(LinkedHashMap<Integer, String> merkle_tree,
-			ArrayList<HashMap> current_transactions, ArrayList<String> voters) {
-		super();
-		this.merkle_tree = merkle_tree;
-		this.current_transactions = current_transactions;
+	public void setVoters(ArrayList voters) {
 		this.voters = voters;
 	}
 
@@ -247,56 +255,75 @@ class vote_block {
 	}
 	
 	public boolean check_voters(String voter) {
-		for(String vote : this.voters) {
-			if(vote == voter) {
-				return false;
-			}
+		int token = (Integer)this.users.get(voter).get("token");
+		if(this.voters.contains(voter)) {
+			this.users.get(voter).put("token", token + 1);
+			return false;
+		}
+		if(token < 0) {
+			return false;
 		}
 		return true;
 	}
 	
 	public HashMap<String, String> new_transaction(String voter, String candidate) {
 		HashMap<String, String> transac = new HashMap<String, String>();
+		HashMap<String, Object> info = this.users.get(voter);
+		int token = (int)info.get("token");
 		transac.put("voter", voter);
 		transac.put("candidate", candidate);
+		info.put("token", token - 1);
+
 		return transac;
 	}
 	
-	public boolean add_transaction(HashMap<String, String> transac, String encrypted, String key, getRsa rsa) throws NoSuchAlgorithmException, NoSuchPaddingException {
-		if(rsa.decryption(encrypted, key) == "false") return false;
-		if(!check_voters(transac.get("voter"))) {
+	public boolean add_transaction(HashMap<String, String> transac, block_header bh) {
+		String voter = transac.get("voter");
+		if(check_voters(voter)) {
 			this.current_transactions.add(transac);
-			this.merkle_tree = transaction_record();
+			transaction_record();
 			update_voters(transac.get("voter"));
+
+			return true;
 		}
-		return true;
+		return false;
 	}
+
 	
 	public boolean valid_block(block block, ArrayList<Object> chain) {
-		genesisblock_header genesis_h = (genesisblock_header)chain.get(0);
+		genesisblock_header genesis_h = ((genesisblock)chain.get(0)).getGenesis_h();
 		block_header block_h = block.getBlock_h();
-		block_header last_h = last_block(chain).getBlock_h();
-		
-		if(block_h.getTime() > genesis_h.getDeadline()) return false;
-		if(block_h.getIndex() != last_h.getIndex()+1) return false;
-		if(valid_proof(block_h) == "false") return false;
-		if(block_h.getPrevious_hash() != hash(last_h.toString())) return false;
-		
-		return true;
+
+		if(chain.size() > 2) {	
+			block_header last_h = last_block(chain).getBlock_h();
+			
+			if(block_h.getTime() > genesis_h.getDeadline()) {return false;}
+			if(block_h.getIndex() != last_h.getIndex()+1) {return false;}
+			if(!valid_proof(block_h)) {return false;}
+			if(!block_h.getPrevious_hash().equals(hash(last_h.toString()))) {return false;}
+			
+			return true;
+		}
+		else {
+			if(block_h.getTime() > genesis_h.getDeadline()) {return false;}
+			if(block_h.getIndex() != genesis_h.getIndex()+1) {return false;}
+			if(!valid_proof(block_h)) {return false;}
+			if(!block_h.getPrevious_hash().equals(hash(genesis_h.toString()))) {return false;}
+			
+			return true;
+		}
 	} 
 	
-	public block_header proof_of_work(block_header block_h) {
-		if(valid_proof(block_h) == "false") {
+	public void proof_of_work(block_header block_h) {
+		while(!valid_proof(block_h)) {
 			block_h.setProof(1);
-			return null;
+			}
 		}
-		return block_h;
-	}
-	public static String valid_proof(block_header block_h) {
+	
+	public static boolean valid_proof(block_header block_h) {
 		String guess_hash = hash(block_h.toString());
-		if(guess_hash.substring(0, 4) == "0000") 
-			return guess_hash;
-		else return "false";
+		if(guess_hash.substring(0, 4).equals("0000")) return true;
+		else return false;
 		
 	}
 	
@@ -311,17 +338,21 @@ class vote_block {
 	}
 	
 	public LinkedHashMap<Integer, String> transaction_record() {
-		LinkedHashMap<Integer, String> merkle_tree = new LinkedHashMap<>();
-		ArrayList<Object> transaction = (ArrayList<Object>) this.current_transactions.clone();
+		LinkedHashMap<Integer, String> merkle_tree = this.merkle_tree;
+		ArrayList<HashMap> transaction = this.current_transactions;
+		ArrayList<String> transac = new ArrayList<>();
+		for(int i = 0; i < transaction.size(); i++) {
+			transac.add(i, transaction.get(i).toString());
+		}
 		int length = transaction.size();
 		int dep = (int)baseLog(length, 2);
 		int nodes = (int) Math.pow(2, dep);
 		int extra_nodes = length - nodes;
 		int non = (int) Math.pow(2, dep+1);
 		for(int i = 0; i < extra_nodes; i++) {
-			HashMap left = (HashMap) transaction.get(i);
+			String left = transac.get(i);
 			transaction.remove(i);
-			HashMap right = (HashMap) transaction.get(i);
+			String right = transac.get(i);
 			transaction.remove(i);
 			String left_hash = hash(left.toString());
 			String right_hash = hash(right.toString());
@@ -329,45 +360,33 @@ class vote_block {
 			non += 1;
 			merkle_tree.put(non, right_hash);
 			non += 1;
-			transaction.add(i, left_hash+right_hash);
+			transac.add(i, left_hash + right_hash);
 		}
 		while(true) {
-			length = transaction.size();
+			length = transac.size();
+			if(length == 1) {
+				merkle_tree.put(1, hash(transac.get(0).toString()));
+			}
 			dep = (int)baseLog(length, 2);
 			nodes = non = (int)Math.pow(2, dep);
 			for(int i = 0; i < (int)nodes/2; i++) {
-				HashMap left = (HashMap) transaction.get(i);
-				transaction.remove(i);
+				String left = transac.get(i);
+				transac.remove(i);
 				String left_hash = hash(left.toString());
 				merkle_tree.put(non, left_hash);
 				non += 1;
-				HashMap right = (HashMap) transaction.get(i);
-				transaction.remove(i);
+				String right = transac.get(i);
+				transac.remove(i);
 				String right_hash = hash(right.toString());
 				merkle_tree.put(i, right_hash);
 				non += 1;
-				transaction.add(i, left_hash+right_hash);
+				transac.add(i, left_hash+right_hash);
 			}	
-			if(length == 1) {
-				merkle_tree.put(1, hash(transaction.get(0).toString()));
-				return merkle_tree;
-			}
-		}
-	}	
-	
-	public block_header calculate_proof(block_header block_h) {
-		while((proof_of_work(block_h)) == null) {
-			if(block_h.getMerkle_root() != this.merkle_tree.get(1)) {
-				block_h.setMerkle_root(this.merkle_tree.get(1));
-			}
-		}
-		return block_h;
-	}
-	
-	public static double baseLog(double x, double base) {
 
-		return Math.log10(x) / Math.log10(base);
+		}
 	}
+	
+
 
 	public static String hash(String key) {
 		StringBuffer hexString = new StringBuffer();
@@ -385,8 +404,11 @@ class vote_block {
 		}
 		return hexString.toString();
 	}
-	private block last_block(ArrayList<Object> chain) {
+	public block last_block(ArrayList<Object> chain) {
 		return (block)chain.get(chain.size()-1);
 	}
+	public static double baseLog(double x, double base) {
 
+		return Math.log10(x) / Math.log10(base);
+	}
 }
