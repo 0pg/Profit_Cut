@@ -6,8 +6,11 @@ import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.Toast;
 
 public class VoteParticipationActivity extends AppCompatActivity {
+    EditText vote_name_Text;
 
     SQLiteDatabase db;
 
@@ -15,17 +18,25 @@ public class VoteParticipationActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_vote_participation);
+
+        vote_name_Text = (EditText) findViewById(R.id.vote_name_Text);
     }
 
     public void onButtonMenu(View view) {
+        String vote_name = vote_name_Text.getText().toString();
+
         Intent MenuIntent = new Intent(VoteParticipationActivity.this, MenuActivity.class);
 
-        String subject = "컴퓨터과학과";
+        if (vote_name.equals("컴퓨터과학과")) {
+            String subject = vote_name;
 
-        openDatabase();
-        createTable(subject);
+            openDatabase();
+            createTable(subject);
 
-        startActivity(MenuIntent);
+            startActivity(MenuIntent);
+        } else {
+            Toast.makeText(getApplicationContext(), "존재하지 않는 투표입니다.", Toast.LENGTH_LONG). show();
+        }
     }
 
     private void openDatabase() {
