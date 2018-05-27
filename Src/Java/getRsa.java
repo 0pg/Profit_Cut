@@ -134,7 +134,6 @@ public class getRsa {
 		PrivateKey prk = (PrivateKey) rsa.decode_privateKey(pk);
 		byte[] a = rsa.encryption(msg, prk);
 		String b = rsa.decryption(rsa.encode_base64(a), k);
-		System.out.println(b);
 	}
 	
 	

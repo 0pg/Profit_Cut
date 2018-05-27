@@ -3,6 +3,8 @@ package votechain;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -63,12 +65,12 @@ public class server_socket implements Runnable{
 	}
 	
 	private void udp_server() throws IOException, ClassNotFoundException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeySpecException, InterruptedException {
-		byte[] buf = new byte[512];
+		byte[] buf = new byte[2048];
 		DatagramPacket packet = new DatagramPacket(buf, buf.length);
 		this.udp_sock.receive(packet);
 		
-		ObjectInputStream iStream = new ObjectInputStream(new ByteArrayInputStream(buf));
-		HashMap data = (HashMap) iStream.readObject();
+		ObjectInputStream iStream = new ObjectInputStream(new ByteArrayInputStream(packet.getData()));
+		HashMap data = (HashMap)iStream.readObject();
 		iStream.close();
 		
 		InetAddress address = packet.getAddress();
@@ -79,7 +81,8 @@ public class server_socket implements Runnable{
 			buf = "Profit_OK".getBytes();
 			packet = new DatagramPacket(buf, buf.length, address, 12222);
 			this.udp_sock.send(packet);
-			tcp_send_data();
+			ThreadHandler2 th2 = new ThreadHandler2();
+			th2.start();
 		}
 		else if(data.containsKey("Profit_Cut_transac"+subject)) {
 			HashMap transac = (HashMap)data.get("Profit_Cut_transac"+subject);
@@ -114,21 +117,22 @@ public class server_socket implements Runnable{
 	
 	private void tcp_send_data() throws IOException, InterruptedException {
 		while(true) {
+			byte[] chain = message_serialize(this.chains);
 			Socket socket = this.tcp_sock.accept();
-			System.out.println("accepted!");
-			ThreadHandler handler = new ThreadHandler(socket, this.chains);
+			ThreadHandler handler = new ThreadHandler(socket, chain);
 			handler.start();
 			handler.join();
 		}
 	}
 	
-	private byte[] message_serialize(ArrayList<Object> chain) throws IOException {
+	private byte[] message_serialize(ArrayList chain) throws IOException {
 		ByteArrayOutputStream bStream = new ByteArrayOutputStream();
 		ObjectOutput oo = new ObjectOutputStream(bStream); 
 		oo.writeObject(chain);
-		oo.close();
 		byte[] serializedMessage = bStream.toByteArray();
-		
+		oo.flush();
+		oo.close();
+
 		return serializedMessage;
 	}
 	@Override
@@ -144,20 +148,20 @@ public class server_socket implements Runnable{
 	
 	class ThreadHandler extends Thread{
 		private Socket connectedClientSocket;
-		private ArrayList<Object> chain;
+		byte[] chain;
 
-		public ThreadHandler(Socket connectedClientSocket, ArrayList<Object> chain) {
+		public ThreadHandler(Socket connectedClientSocket, byte[] chain) {
 			super();
 			this.connectedClientSocket = connectedClientSocket;
 			this.chain = chain;
 		}
 		public void run() {
 			try {
-				byte[] chain = message_serialize(this.chain);
 				OutputStream os = this.connectedClientSocket.getOutputStream();
-				ObjectOutputStream oos = new ObjectOutputStream(os);
-				oos.writeObject(chain);
-				oos.flush();
+				DataOutputStream dos = new DataOutputStream(os);
+				dos.write(this.chain);
+				dos.flush();
+				dos.close();
 			} catch(IOException ignored) {
 			} finally {
 				try {
@@ -166,8 +170,19 @@ public class server_socket implements Runnable{
 			}
 		}
 	}
-	public static void main(String[] args) {
-}
+	
+	class ThreadHandler2 extends Thread{
+		public void run() {
+			try {
+				tcp_send_data();
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
 }
 	
 

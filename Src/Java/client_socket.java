@@ -55,7 +55,6 @@ public class client_socket {
 			this.udp_sock.receive(packet);
 			String pack = new String(packet.getData(), 0, packet.getLength());
 			if(pack.contains("Profit_OK")) {
-				System.out.println("OKOK");
 				tcp_recv_chain(packet.getAddress());
 				this.addrlist.add(packet.getAddress());
 			}
@@ -92,17 +91,13 @@ public class client_socket {
 		broadcast(serializedMessage);
 	}
 	
-	public void tcp_recv_chain(InetAddress addr) throws ClassNotFoundException {
-			try {
+	public void tcp_recv_chain(InetAddress addr) throws ClassNotFoundException, IOException {
 				Socket tcp_sock = new Socket(addr, this.tcp_port);
 				InputStream is = tcp_sock.getInputStream();
 				ObjectInputStream ois = new ObjectInputStream(is);
-				ArrayList<Object> chain = (ArrayList<Object>)ois.readObject();
-				System.out.println(chain.size());
-				this.chainlist.add(chain);
+				this.chainlist.add((ArrayList)ois.readObject());
+				ois.close();
 				tcp_sock.close();
-			} catch (IOException ignored) { 
-			}
 	}
 	
 	private String encrypt(PrivateKey pk) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
@@ -130,14 +125,4 @@ public class client_socket {
 	}
 }
 
-//	public static void main(String[] args) throws SocketException {
-//		ArrayList<ArrayList> chainlist = new ArrayList<>();
-//		ArrayList<String> a = new ArrayList<>();
-//		ArrayList<InetAddress> addrlist = new ArrayList<>();
-//		a.add("Hello");
-//		chainlist.add(a);
-//		client_socket cs = new client_socket("ÇÐ»ý", new DatagramSocket(12222), "A", chainlist, addrlist);
-//		cs.broadcast_verify();
-//		System.out.println(addrlist.toString());
-//	}
 

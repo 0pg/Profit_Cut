@@ -47,6 +47,8 @@ public class main {
 		ArrayList<String> candidates = new ArrayList<>();
 		HashMap<String, HashMap> users = new HashMap<>();
 		ArrayList<ArrayList> chainlist = new ArrayList<>();
+		ArrayList<ArrayList> chainlists = new ArrayList<>();
+
 		HashMap<String, Object> map = new HashMap<>();
 		ArrayList<InetAddress> addrlist = new ArrayList<>();
 		
@@ -76,10 +78,8 @@ public class main {
 		
 
 		ThreadHandler th = new ThreadHandler(vb,  bh);
-		th.start();
+		th.start();		
 		th.join();
-		
-		
 		vb.add_transaction(transac2, bh);
 
 		vc.reslove_conflicts(chainlist);
@@ -87,7 +87,7 @@ public class main {
 
 		
 		do {
-			System.out.println(bh.toString());
+//			System.out.println(bh.toString());
 			b = new block(current_transactions, merkle_tree, bh);
 		}while(!vb.valid_proof(bh));
 		System.out.println(vb.hash(bh.toString()).equals(b.getBlock_hash()));
@@ -102,26 +102,31 @@ public class main {
 			vc.add_block(b);
 			current_transactions = new ArrayList<>();
 		}
-		System.out.println(chain.toString());
+	//	System.out.println(chain.toString());
 
 		
 		server_socket ss = new server_socket(vb, vc, tcp_sock, udp_sock, chain, current_transactions, "รัวะ", users);
-		client_socket cs = new client_socket("รัวะ", udp_sock, "201311100", chainlist, addrlist);
+		client_socket cs = new client_socket("รัวะ", udp_sock, "201311100", chainlists, addrlist);
 		System.out.println(1);
 		Thread th2 = new Thread(ss);
 		th2.start();
-		System.out.println(1);
 		cs.broadcast_verify();
+		PrivateKey pk = (PrivateKey)rsa.get_private();
+		cs.broadcast_newbie((PublicKey) rsa.get_public(), pk);
 		Thread.sleep(1000);
-		System.out.println(addrlist.toString());
+		HashMap transac3 = vb.new_transaction("201311100", "c");
+
+		cs.broadcast_transac(transac3, pk);
+		cs.broadcast_block(b, pk);
 		
-		System.out.println(chainlist.size());
-//		PrivateKey pk = (PrivateKey)rsa.get_private();
-//		cs.broadcast_newbie((PublicKey) rsa.get_public(), pk);
+		//	cs.broadcast_block(b, pk);
+		System.out.println(current_transactions.toString());
+//		Thread.sleep(1000);
+//		System.out.println(addrlist.toString());
+//		
+//		System.out.println(chainlist.size());
 //		Thread.sleep(1000);
 //		System.out.println(users.toString());
-//		HashMap transac3 = vb.new_transaction("201311100", "c");
-//		cs.broadcast_transac(transac3, pk);
 //		Thread.sleep(1000);
 //		System.out.println(current_transactions);
 //		Thread.sleep(1000);

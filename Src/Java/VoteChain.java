@@ -1,12 +1,13 @@
 package votechain;
 
+import java.io.Serializable;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
-class genesisblock_header {
+class genesisblock_header implements Serializable{
 	private String ver;
 	private int index;
 	private float time;
@@ -38,7 +39,7 @@ class genesisblock_header {
 	
 }
 
-class genesisblock {
+class genesisblock implements Serializable{
 	private String block_hash;
 	private String subject;
 	private String constructor;
@@ -87,7 +88,7 @@ class genesisblock {
 	
 }
 
-class block_header {
+class block_header implements Serializable{
 	private String ver;
 	private int index;
 	private int proof;
@@ -138,7 +139,7 @@ class block_header {
 	}
 }
 
-class block{
+class block implements Serializable{
 	private String block_hash;
 	private ArrayList<HashMap> transaction_pool;
 	private HashMap<Integer, String> merkle_tree;
