@@ -89,6 +89,14 @@ public class PutDataBase extends AppCompatActivity {
         db.insert(name, null, recordValues);
     }
 
+    public void insertIdentifier(String name, String id, String prk) {
+        ContentValues recoValues = new ContentValues();
+
+        String sql = "insert into " + name + " values('" + id +"', '" + prk +"');";
+        System.out.println(sql);
+        db.execSQL(sql);
+    }
+
     /**
      * @title : public void updateUserInfo(String name, String id, int token)
      * @author : 임현 (hyunzion@gmail.com)

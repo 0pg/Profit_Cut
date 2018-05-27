@@ -16,15 +16,4 @@ public class TestActivity extends AppCompatActivity {
         setContentView(R.layout.activity_test);
     }
 
-    public void onButtonReturn(View view) {
-        Intent ReturnIntent = new Intent(TestActivity.this, LoginActivity.class);
-
-        TelephonyManager telManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-
-        String PhoneNum = telManager.getLine1Number();
-
-        Toast.makeText(getApplicationContext(), PhoneNum, Toast.LENGTH_LONG). show();
-
-        startActivity(ReturnIntent);
-    }
 }

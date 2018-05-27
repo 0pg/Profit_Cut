@@ -9,7 +9,6 @@ import java.util.ArrayList;
 
 public class GetDataBase extends AppCompatActivity {
     SQLiteDatabase db;
-
     public GetDataBase() {
         super();
 
@@ -28,7 +27,7 @@ public class GetDataBase extends AppCompatActivity {
         }
     }
 
-    public void selectUserInfo(String name) {
+    public ArrayList selectUserInfo(String name) {
         String[] columns = {"id", "pk", "token"};
         ArrayList<Object> array = new ArrayList<>();
         Cursor c1 = db.query(name, columns, null, null, null, null, null);
@@ -41,9 +40,11 @@ public class GetDataBase extends AppCompatActivity {
             array.add(i + 1, c1.getString(1));
             array.add(i + 2, c1.getInt(2));
         }
+
+        return array;
     }
 
-    public void selectChain(String name) {
+    public ArrayList selectChain(String name) {
         String[] columns = {"idx", "deadline", "subject", "constructor", "ver", "time", "proof", "precious_hash", "merkle_root", "block_hash"};
         ArrayList<Object> array = new ArrayList<>();
         Cursor c1 = db.query(name, columns, null, null, null, null, null);
@@ -63,9 +64,11 @@ public class GetDataBase extends AppCompatActivity {
             array.add(i + 8, c1.getString(8));
             array.add(i + 9, c1.getString(9));
         }
+
+        return array;
     }
 
-    public void selectTransactionPool(String name) {
+    public ArrayList selectTransactionPool(String name) {
         String[] columns = {"idx", "voter", "candidate"};
         ArrayList<Object> array = new ArrayList<>();
         Cursor c1 = db.query(name, columns, null, null, null, null, null);
@@ -78,9 +81,11 @@ public class GetDataBase extends AppCompatActivity {
             array.add(i + 1, c1.getString(1));
             array.add(i + 2, c1.getString(2));
         }
+
+        return array;
     }
 
-    public void selectVoters(String name) {
+    public ArrayList selectVoters(String name) {
         String[] columns = {"account"};
         ArrayList<Object> array = new ArrayList<>();
         Cursor c1 = db.query(name, columns, null, null, null, null, null);
@@ -91,9 +96,11 @@ public class GetDataBase extends AppCompatActivity {
             c1.moveToNext();
             array.add(i, c1.getString(0));
         }
+
+        return array;
     }
 
-    public void selectCandidates(String name) {
+    public ArrayList selectCandidates(String name) {
         String[] columns = {"candidate"};
         ArrayList<Object> array = new ArrayList<>();
         Cursor c1 = db.query(name, columns, null, null, null, null, null);
@@ -104,5 +111,26 @@ public class GetDataBase extends AppCompatActivity {
             c1.moveToNext();
             array.add(i, c1.getString(0));
         }
+        return array;
+    }
+
+    public Object selectIdentifier(String name) {
+        String[] colums = {"id", "prk"};
+        ArrayList<Object> array = new ArrayList<>();
+        String sql = "select * from " + name;
+        System.out.println(sql);
+        Cursor c1 = db.rawQuery(sql, null);
+
+        int recordCount = c1.getCount();
+
+        if(c1.moveToFirst()){
+            array.add(c1.getString(0));
+            array.add(c1.getString(1));
+        }
+
+        if(recordCount == 0)
+            return false;
+        else
+            return array;
     }
 }
