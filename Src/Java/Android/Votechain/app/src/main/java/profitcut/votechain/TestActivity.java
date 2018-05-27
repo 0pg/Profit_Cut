@@ -22,6 +22,7 @@ public class TestActivity extends AppCompatActivity {
         TelephonyManager telManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
         Intent ReturnIntent = new Intent(TestActivity.this, LoginActivity.class);;
         startActivity(ReturnIntent);
     }
@@ -74,6 +75,13 @@ public class TestActivity extends AppCompatActivity {
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         }
 =======
+        startActivity(ReturnIntent);
+>>>>>>> parent of 0a64137... Add SQLiteOpenHelper
+=======
+        String PhoneNum = telManager.getLine1Number();
+
+        Toast.makeText(getApplicationContext(), PhoneNum, Toast.LENGTH_LONG). show();
+
         startActivity(ReturnIntent);
 >>>>>>> parent of 0a64137... Add SQLiteOpenHelper
     }
