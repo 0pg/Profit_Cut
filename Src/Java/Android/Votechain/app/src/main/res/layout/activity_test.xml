@@ -6,4 +6,16 @@
     android:layout_height="match_parent"
     tools:context=".TestActivity">
 
+    <Button
+        android:layout_width="280dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="10dp"
+        android:background="@color/colorPrimaryDark"
+        android:onClick="onButtonReturn"
+        android:text="Return"
+        android:textColor="#ffffff"
+        android:textSize="20dp"
+        android:textStyle="bold" />
+
 </android.support.constraint.ConstraintLayout>

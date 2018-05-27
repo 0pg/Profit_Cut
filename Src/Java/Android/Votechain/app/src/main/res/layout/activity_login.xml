@@ -51,7 +51,7 @@
             android:orientation="vertical"
             android:layout_marginTop="80dp">
 
-            <!--
+
             <Button
                 android:layout_width="280dp"
                 android:layout_height="wrap_content"
@@ -63,7 +63,7 @@
                 android:textColor="#ffffff"
                 android:textSize="20dp"
                 android:textStyle="bold" />
-                -->
+
 
             <Button
                 android:layout_width="280dp"
