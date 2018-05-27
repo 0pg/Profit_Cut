@@ -1,7 +1,7 @@
 # Profit_Cut
 
 블록체인 기술을 활용한 투표 시스템 (안드로이드)
-![Logo](https://github.com/201311105/Profit_Cut/blob/master/Doc/README/logo.png) {: width="50" height="50"}
+![Logo](https://github.com/201311105/Profit_Cut/blob/master/Doc/README/logo.png)
 
 블록체인
 --------
