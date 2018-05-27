@@ -2,28 +2,19 @@ package profitcut.votechain;
 
 import android.app.Activity;
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.support.v7.app.AppCompatActivity;
 
 public class PutDataBase extends AppCompatActivity {
-    SQLiteDatabase db;
-
+    private static int DATABASE_VERSION = 1;
+    private DatabaseHelper dbHelper;
+    private SQLiteDatabase db;
     public PutDataBase() {
         super();
 
         openDatabase();
-    }
-
-    private void openDatabase() {
-        String name = "profitcut";
-
-        try {
-            db = openOrCreateDatabase(
-                    name,
-                    Activity.MODE_PRIVATE,
-                    null);
-        } catch (Exception ex) {
-        }
     }
 
     public void insertUserInfo(String name, String id, String pk, int token) {
@@ -131,5 +122,22 @@ public class PutDataBase extends AppCompatActivity {
         String [] whereArgs = {Integer.toString(idx)};
 
         db.delete(name, "idx = ?", whereArgs);
+    }
+    private void openDatabase() {
+        dbHelper = new DatabaseHelper(this);
+        db = dbHelper.getWritableDatabase();
+    }
+    private class DatabaseHelper extends SQLiteOpenHelper {
+        public DatabaseHelper(Context context) {
+            super(context, "profitcut", null, DATABASE_VERSION);
+        }
+
+        public void onCreate(SQLiteDatabase db) {
+        }
+        public void onOpen(SQLiteDatabase db) {
+        }
+
+        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        }
     }
 }

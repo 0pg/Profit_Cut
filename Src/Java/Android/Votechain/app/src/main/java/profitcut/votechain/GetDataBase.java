@@ -1,30 +1,22 @@
 package profitcut.votechain;
 
 import android.app.Activity;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.support.v7.app.AppCompatActivity;
 
 import java.util.ArrayList;
 
 public class GetDataBase extends AppCompatActivity {
-    SQLiteDatabase db;
+    private static int DATABASE_VERSION = 1;
+    private DatabaseHelper dbHelper;
+    private SQLiteDatabase db;
     public GetDataBase() {
         super();
 
         openDatabase();
-    }
-
-    private void openDatabase() {
-        String name = "profitcut";
-
-        try {
-            db = openOrCreateDatabase(
-                    name,
-                    Activity.MODE_PRIVATE,
-                    null);
-        } catch (Exception ex) {
-        }
     }
 
     public ArrayList selectUserInfo(String name) {
@@ -133,4 +125,23 @@ public class GetDataBase extends AppCompatActivity {
         else
             return array;
     }
+
+    private void openDatabase() {
+        dbHelper = new DatabaseHelper(this);
+        db = dbHelper.getReadableDatabase();
+    }
+    private class DatabaseHelper extends SQLiteOpenHelper {
+        public DatabaseHelper(Context context) {
+            super(context, "profitcut", null, DATABASE_VERSION);
+        }
+
+        public void onCreate(SQLiteDatabase db) {
+        }
+        public void onOpen(SQLiteDatabase db) {
+        }
+
+        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        }
+    }
+
 }

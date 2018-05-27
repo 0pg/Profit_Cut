@@ -52,11 +52,14 @@ public class LoginActivity extends AppCompatActivity {
 
         createDatabase();
         user_infoTable();
-        ArrayList<Object> info1 = (ArrayList)new GetDataBase().selectIdentifier("identifier");
-        System.out.println(info1.toString());
-        if(info1.size() < 1){
+//        GetDataBase gd = new GetDataBase();
+//        PutDataBase pd = new PutDataBase();
+//        ArrayList<Object> info1 = (ArrayList)gd.selectIdentifier("identifier");
+//        System.out.println(info1.toString());
+        String info1 = new TestActivity().selectTest();
+        if(info1.length() > 1){
             ArrayList<String> info = (ArrayList)new GetDataBase().selectIdentifier("identifier");
-            Toast.makeText(getApplicationContext(), "success", Toast.LENGTH_LONG). show();
+            Toast.makeText(getApplicationContext(), info1, Toast.LENGTH_LONG). show();
             info = (ArrayList)new GetDataBase().selectIdentifier("identifier");
                 this.id = info.get(0);
                 this.prk = info.get(1);

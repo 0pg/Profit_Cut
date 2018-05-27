@@ -28,8 +28,6 @@ public class TestActivity extends AppCompatActivity {
         openDatabase();
     }
 
-<<<<<<< HEAD
-=======
     public void onButtonReturn(View view) {
 
 
@@ -41,7 +39,7 @@ public class TestActivity extends AppCompatActivity {
         selectTest();
     }
 
-    private void selectTest() {
+    public String selectTest() {
         String[] columns = {"id", "pk", "token"};
         Cursor c1 = db.query("user_info", columns, null, null, null, null, null);
 
@@ -57,6 +55,7 @@ public class TestActivity extends AppCompatActivity {
         Toast.makeText(getApplicationContext(), id + pk + Integer.toString(token), Toast.LENGTH_LONG). show();
 
         c1.close();
+        return pk;
     }
 
     private void openDatabase() {
@@ -85,5 +84,4 @@ public class TestActivity extends AppCompatActivity {
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         }
     }
->>>>>>> 0a6413781fcc673819c138e1a8691a587a19547c
 }
