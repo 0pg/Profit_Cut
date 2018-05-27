@@ -6,35 +6,16 @@
     android:layout_height="match_parent"
     tools:context=".TestActivity">
 
-    <LinearLayout
-        android:layout_width="wrap_content"
+    <Button
+        android:layout_width="280dp"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
-
-        <Button
-            android:layout_width="280dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="10dp"
-            android:background="@color/colorPrimaryDark"
-            android:onClick="onButtonReturn"
-            android:text="Return"
-            android:textColor="#ffffff"
-            android:textSize="20dp"
-            android:textStyle="bold" />
-
-        <Button
-            android:layout_width="280dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="10dp"
-            android:background="@color/colorPrimaryDark"
-            android:onClick="onButtonTest2"
-            android:text="TEST2"
-            android:textColor="#ffffff"
-            android:textSize="20dp"
-            android:textStyle="bold" />
-
-    </LinearLayout>
+        android:layout_gravity="center"
+        android:layout_marginTop="10dp"
+        android:background="@color/colorPrimaryDark"
+        android:onClick="onButtonReturn"
+        android:text="Return"
+        android:textColor="#ffffff"
+        android:textSize="20dp"
+        android:textStyle="bold" />
 
 </android.support.constraint.ConstraintLayout>
