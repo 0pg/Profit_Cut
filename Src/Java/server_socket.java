@@ -16,12 +16,15 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
+import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.crypto.NoSuchPaddingException;
 
 public class server_socket implements Runnable{
+	private vote_block vb;
+	private vote_chain vc;
 	private ServerSocket tcp_sock;
 	private DatagramSocket udp_sock;
 	private ArrayList<HashMap> transacs;
@@ -29,7 +32,6 @@ public class server_socket implements Runnable{
 	private ArrayList<Object> chains;
 	private String subject;
 	private HashMap<String, HashMap> attendances; 
-	private ArrayList<Object> chain;
 	
 	public ArrayList<HashMap> getTransacs() {
 		return transacs;
@@ -47,23 +49,25 @@ public class server_socket implements Runnable{
 		return attendances;
 	}
 
-	public server_socket(ArrayList<Object> chains, String subject, HashMap attendances) throws IOException {
+	public server_socket(vote_block vb, vote_chain vc, ServerSocket tcp_sock, DatagramSocket udp_sock, ArrayList<Object> chains, ArrayList<HashMap> transacs, String subject, HashMap attendances) throws IOException {
 		super();
-		this.tcp_sock = new ServerSocket(12223);
-		this.udp_sock = new DatagramSocket(12222);
-		this.transacs = new ArrayList<HashMap>();
+		this.vb = vb;
+		this.vc = vc;
+		this.tcp_sock = tcp_sock;
+		this.udp_sock = udp_sock;
+		this.transacs = transacs;
 		this.subject = subject;
 		this.blocks = new ArrayList<block>();
 		this.chains = chains;
 		this.attendances = attendances;
 	}
 	
-	private void udp_server() throws IOException, ClassNotFoundException, NoSuchAlgorithmException, NoSuchPaddingException {
+	private void udp_server() throws IOException, ClassNotFoundException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeySpecException, InterruptedException {
 		byte[] buf = new byte[512];
 		DatagramPacket packet = new DatagramPacket(buf, buf.length);
 		this.udp_sock.receive(packet);
 		
-		ObjectInputStream iStream = new ObjectInputStream(new ByteArrayInputStream(packet.getData()));
+		ObjectInputStream iStream = new ObjectInputStream(new ByteArrayInputStream(buf));
 		HashMap data = (HashMap) iStream.readObject();
 		iStream.close();
 		
@@ -73,7 +77,7 @@ public class server_socket implements Runnable{
 		
 		if(data.containsKey("Profit_Cut?"+subject)) {
 			buf = "Profit_OK".getBytes();
-			packet = new DatagramPacket(buf, buf.length, address, 122222);
+			packet = new DatagramPacket(buf, buf.length, address, 12222);
 			this.udp_sock.send(packet);
 			tcp_send_data();
 		}
@@ -83,32 +87,38 @@ public class server_socket implements Runnable{
 			String sender = (String) data.get("sender");
 			String encrypt_num = (String) data.get("encrypted");
 			PublicKey key = (PublicKey) this.attendances.get(sender).get("Key");
-			if(rsa.decryption(encrypt_num, key) != "false")
-				transacs.add((HashMap) data.get("Profit_Cut_transac"+subject));
+			if(!rsa.decryption(encrypt_num, key).equals("false")) {
+				this.transacs.add(transac);
+			}
 		}
 		else if(data.containsKey("Profit_Cut_block"+subject)) {
-			blocks.add((block) data.get("Profit_Cut_block"+subject));
+			block b = (block) data.get("Profit_Cut_block"+subject);
+			if(vb.valid_block(b, this.chains)) {
+				vc.add_block(b);
+			}
 		}
 		else if(data.containsKey("Profit_Cut_newbie"+subject)) {
 			String account = (String)data.get("Profit_Cut_newbie"+subject);
+			String encrypted = (String)data.get("encrypted");
 			getRsa rsa = new getRsa();
-			PublicKey key =  (PublicKey)data.get("key");
-			String user = rsa.decryption(account, key);
+			PublicKey key = (PublicKey)(rsa.decode_publickey((String)(data.get("Key"))));
+			String user = rsa.decryption(encrypted, key);
 			HashMap<String, Object> info = new HashMap<>();
-			info.put("account", user);
 			info.put("Key", key);
 			info.put("token", 1);
-			if(account != "false") {
-				attendances.put(account, info);
+			if(!user.equals("false") && !this.attendances.containsKey(user)) {
+				this.attendances.put(account, info);
 			}
 		}
 	}
 	
-	public void tcp_send_data() throws IOException {
+	private void tcp_send_data() throws IOException, InterruptedException {
 		while(true) {
 			Socket socket = this.tcp_sock.accept();
-			ThreadHandler handler = new ThreadHandler(socket);
+			System.out.println("accepted!");
+			ThreadHandler handler = new ThreadHandler(socket, this.chains);
 			handler.start();
+			handler.join();
 		}
 	}
 	
@@ -126,7 +136,7 @@ public class server_socket implements Runnable{
 		while(true) {
 			try {
 				udp_server();
-			} catch (ClassNotFoundException | NoSuchAlgorithmException | NoSuchPaddingException | IOException e) {
+			} catch (ClassNotFoundException | NoSuchAlgorithmException | NoSuchPaddingException | IOException | InvalidKeySpecException | InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
@@ -136,17 +146,18 @@ public class server_socket implements Runnable{
 		private Socket connectedClientSocket;
 		private ArrayList<Object> chain;
 
-		public ThreadHandler(Socket connectedClientSocket) {
+		public ThreadHandler(Socket connectedClientSocket, ArrayList<Object> chain) {
 			super();
 			this.connectedClientSocket = connectedClientSocket;
+			this.chain = chain;
 		}
 		public void run() {
 			try {
 				byte[] chain = message_serialize(this.chain);
 				OutputStream os = this.connectedClientSocket.getOutputStream();
-				ObjectOutputStream dis = new ObjectOutputStream(os);
-				((ObjectOutput) os).writeObject(chain);
-				os.flush();
+				ObjectOutputStream oos = new ObjectOutputStream(os);
+				oos.writeObject(chain);
+				oos.flush();
 			} catch(IOException ignored) {
 			} finally {
 				try {
@@ -155,8 +166,8 @@ public class server_socket implements Runnable{
 			}
 		}
 	}
-	
-
+	public static void main(String[] args) {
+}
 }
 	
 

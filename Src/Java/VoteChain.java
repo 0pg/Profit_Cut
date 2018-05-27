@@ -202,7 +202,7 @@ class vote_chain {
 			block block = (block)chain.get(current_index);
 			block_header block_h = block.getBlock_h();
 			
-			if(block_h.getPrevious_hash() != vote_block.hash(last_block.toString())) return false;
+			if(block_h.getPrevious_hash().equals(vote_block.hash(last_block.toString()))) return false;
 			if(!vote_block.valid_proof(block_h)) return false;
 			if(block_h.getTime() > ((genesisblock_header)chain.get(0)).getDeadline()) return false;
 			
@@ -229,9 +229,6 @@ class vote_block {
 	ArrayList<HashMap> current_transactions;
 	ArrayList<String> voters;
 	HashMap<String, HashMap> users;
-
-
-	
 	
 	public vote_block(LinkedHashMap<Integer, String> merkle_tree, ArrayList<HashMap> current_transactions,
 			ArrayList<String> voters, HashMap<String, HashMap> users) {
@@ -337,23 +334,23 @@ class vote_block {
 		return c.getTimeInMillis()/1000;
 	}
 	
-	public LinkedHashMap<Integer, String> transaction_record() {
+	public void transaction_record() {
 		LinkedHashMap<Integer, String> merkle_tree = this.merkle_tree;
 		ArrayList<HashMap> transaction = this.current_transactions;
 		ArrayList<String> transac = new ArrayList<>();
 		for(int i = 0; i < transaction.size(); i++) {
 			transac.add(i, transaction.get(i).toString());
 		}
-		int length = transaction.size();
+		int length = transac.size();
 		int dep = (int)baseLog(length, 2);
 		int nodes = (int) Math.pow(2, dep);
 		int extra_nodes = length - nodes;
 		int non = (int) Math.pow(2, dep+1);
 		for(int i = 0; i < extra_nodes; i++) {
 			String left = transac.get(i);
-			transaction.remove(i);
+			transac.remove(i);
 			String right = transac.get(i);
-			transaction.remove(i);
+			transac.remove(i);
 			String left_hash = hash(left.toString());
 			String right_hash = hash(right.toString());
 			merkle_tree.put(non, left_hash);
@@ -366,6 +363,7 @@ class vote_block {
 			length = transac.size();
 			if(length == 1) {
 				merkle_tree.put(1, hash(transac.get(0).toString()));
+				break;
 			}
 			dep = (int)baseLog(length, 2);
 			nodes = non = (int)Math.pow(2, dep);

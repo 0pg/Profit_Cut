@@ -45,7 +45,7 @@ public class getRsa {
 		return this.keypair.getPublic();
 	}
 	
-	private Key get_private() {
+	public Key get_private() {
 		return this.keypair.getPrivate();
 	}
 	
@@ -102,7 +102,7 @@ public class getRsa {
 //		return pk;
 //	}
 	
-	private Key decode_publickey(String key) throws InvalidKeySpecException {
+	public Key decode_publickey(String key) throws InvalidKeySpecException {
 		X509EncodedKeySpec x509Spec = new X509EncodedKeySpec(decode_base64(key)); 
 		PublicKey pk = this.keyFactory.generatePublic(x509Spec);
 		return pk;
@@ -120,7 +120,7 @@ public class getRsa {
 		return base64;
 	}
 	
-	private byte[] decode_base64(String key) {
+	public byte[] decode_base64(String key) {
 		Decoder decoder = Base64.getDecoder();
 		byte[] base64 = decoder.decode(key);
 		return base64;
