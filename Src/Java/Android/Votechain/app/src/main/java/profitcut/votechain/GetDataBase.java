@@ -20,14 +20,18 @@ public class GetDataBase extends AppCompatActivity {
         super();
     }
 
-    public ArrayList selectUserInfo(String name) {
+    public HashMap<String, HashMap> selectUserInfo(String name) {
         String[] columns = {"id", "pk", "token"};
-        ArrayList<HashMap> array = new ArrayList<>();
-        HashMap<String, Object> map = new HashMap<>();
+        HashMap<String, HashMap> map = new HashMap<>();
+        HashMap<String, Object> map2 = new HashMap<>();
         Cursor c1 = db.query(name, columns, null, null, null, null, null);
-        
-
-        return array;
+        while(c1.moveToNext()) {
+            map2.put("Key", c1.getString(c1.getColumnIndex("pk")));
+            map2.put("token",c1.getInt(c1.getColumnIndex("token")));
+            map.put(c1.getString(c1.getColumnIndex("id")), map2);
+        }
+        myApp.users = map;
+        return map;
     }
 
     public void selectChain(String name) {

@@ -29,21 +29,52 @@ public class clientSocket {
     private String user;
     private int udp_port;
     private int tcp_port;
+    private HashMap<String, HashMap> users;
     private ArrayList<InetAddress> addrlist;
     private ArrayList<ArrayList> chainlist;
 
     public clientSocket (String subject, DatagramSocket udp_sock,
-                          String user, ArrayList<ArrayList> chainlist, ArrayList<InetAddress> addrlist) throws SocketException {
+                          String user, HashMap users, ArrayList<ArrayList> chainlist, ArrayList<InetAddress> addrlist) throws SocketException {
         this.udp_sock = udp_sock;
         this.subject = subject;
         this.user = user;
         this.udp_port = 12222;
         this.tcp_port = 12223;
+        this.users = users;
         this.chainlist = chainlist;
         this.addrlist = addrlist;
     }
 
-    public void broadcast_verify() {
+
+    public void handle_init() {
+        ThreadHandler th = new ThreadHandler();
+        th.start();
+    }
+
+    public void handle_verify() {
+        ThreadHandler2 th2 = new ThreadHandler2();
+        th2.start();
+    }
+
+    private void broadcast_init() {
+        try {
+            HashMap<String, Integer> msg = new HashMap<>();
+            msg.put("Profit_Cut?", 1);
+            byte[] serializedMessage = message_serialize(msg);
+            byte[] buf = new byte[2048];
+            DatagramPacket packet = new DatagramPacket(buf, buf.length);
+            broadcast(serializedMessage);
+            this.udp_sock.receive(packet);
+            String pack = new String(packet.getData(), 0, packet.getLength());
+            if(pack.contains("Profit_OK")) {
+                tcp_recv_users(packet.getAddress());
+            }
+        } catch (Exception ignored) {
+
+        }
+    }
+
+    private void broadcast_verify() {
         try {
             HashMap<String, Object> data = new HashMap<>();
             data.put("Profit_Cut?"+this.subject, "Profit_Cut");
@@ -99,6 +130,14 @@ public class clientSocket {
         ois.close();
         tcp_sock.close();
     }
+    public void tcp_recv_users(InetAddress addr) throws ClassNotFoundException, IOException {
+        Socket tcp_sock = new Socket(addr, this.tcp_port);
+        InputStream is = tcp_sock.getInputStream();
+        ObjectInputStream ois = new ObjectInputStream(is);
+        this.users.putAll((HashMap)(ois.readObject()));
+        ois.close();
+        tcp_sock.close();
+    }
 
     private String encrypt(PrivateKey pk) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
         getRsa rsa = new getRsa();
@@ -107,7 +146,7 @@ public class clientSocket {
         return s;
     }
 
-    private void broadcast(byte[] msg) throws IOException {
+    public void broadcast(byte[] msg) throws IOException {
         byte[] ipAddr = new byte[] {-1, -1, -1, -1};
         InetAddress addr = InetAddress.getByAddress(ipAddr);
         DatagramPacket p = new DatagramPacket(msg, msg.length, addr, this.udp_port);
@@ -122,6 +161,16 @@ public class clientSocket {
         byte[] serializedMessage = bStream.toByteArray();
         oo.close();
         return serializedMessage;
+    }
+    class ThreadHandler extends Thread{
+        public void run() {
+            broadcast_init();
+        }
+    }
+    class ThreadHandler2 extends Thread{
+        public void run() {
+            broadcast_verify();
+        }
     }
 }
 
