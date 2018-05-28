@@ -25,15 +25,7 @@ public class GetDataBase extends AppCompatActivity {
         ArrayList<HashMap> array = new ArrayList<>();
         HashMap<String, Object> map = new HashMap<>();
         Cursor c1 = db.query(name, columns, null, null, null, null, null);
-
-        int recordCount = c1.getCount();
-
-        for (int i = 0; i < recordCount * 3; i += 3) {
-            c1.moveToNext();
-            array.add(i, c1.getString(0));
-            array.add(i + 1, c1.getString(1));
-            array.add(i + 2, c1.getInt(2));
-        }
+        
 
         return array;
     }
