@@ -8,8 +8,13 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.support.v7.app.AppCompatActivity;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import javax.crypto.NoSuchPaddingException;
 
 public class GetDataBase extends AppCompatActivity {
     SQLiteDatabase db;
@@ -20,17 +25,26 @@ public class GetDataBase extends AppCompatActivity {
         super();
     }
 
-    public HashMap<String, HashMap> selectUserInfo(String name) {
-        String[] columns = {"id", "pk", "token"};
-        HashMap<String, HashMap> map = new HashMap<>();
-        HashMap<String, Object> map2 = new HashMap<>();
+    public HashMap<String, Integer> selectUserInfo() {
+        String[] columns = {"id", "token"};
+        HashMap<String, Integer> map = new HashMap<>();
+        Cursor c1 = db.query("user_info", columns, null, null, null, null, null);
+        while(c1.moveToNext()) {
+            map.put(c1.getString(c1.getColumnIndex("id")),c1.getInt(c1.getColumnIndex("token")));
+        }
+        myApp.nodes = map;
+
+        return map;
+    }
+    public HashMap<String, PublicKey> selectUsers(String name) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException {
+        String[] columns = {"id", "pk"};
+        HashMap<String, PublicKey> map = new HashMap<>();
         Cursor c1 = db.query(name, columns, null, null, null, null, null);
         while(c1.moveToNext()) {
-            map2.put("Key", c1.getString(c1.getColumnIndex("pk")));
-            map2.put("token",c1.getInt(c1.getColumnIndex("token")));
-            map.put(c1.getString(c1.getColumnIndex("id")), map2);
+            map.put(c1.getString(c1.getColumnIndex("id")), (PublicKey) new getRsa().decode_publickey(c1.getString(c1.getColumnIndex("pk"))));
         }
         myApp.users = map;
+
         return map;
     }
 
@@ -78,7 +92,7 @@ public class GetDataBase extends AppCompatActivity {
         Cursor c1 = db.query(name, columns, null, null, null, null, null);
 
         while(c1.moveToNext()) {
-            array.add(c1.getString(0));
+            array.add(c1.getString(c1.getColumnIndex("account")));
         }
         myApp.voters = array;
         return array;

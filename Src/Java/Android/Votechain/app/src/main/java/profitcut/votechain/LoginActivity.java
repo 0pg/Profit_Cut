@@ -14,6 +14,7 @@ import android.widget.Toast;
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.ServerSocket;
+import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -21,6 +22,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
 public class LoginActivity extends AppCompatActivity {
@@ -76,6 +79,12 @@ public class LoginActivity extends AppCompatActivity {
         }
         myApp.id = id;
         myApp.prk = prk;
+        myApp.cs = new clientSocket(id, myApp.udp_sock);
+        try {
+            myApp.cs.broadcast_newbie(Puk, Prk);
+        } catch (Exception e) {
+            Toast.makeText(getApplicationContext(), "키 생성 오류", Toast.LENGTH_LONG);
+        }
         Intent ParticipationActivity = new Intent(LoginActivity.this, VoteParticipationActivity.class);
         startActivity(ParticipationActivity);
     }
@@ -115,7 +124,6 @@ public class LoginActivity extends AppCompatActivity {
         db.execSQL("create table if not exists " + name + "("
                 + " id text not null, "
                 + " pk text not null, "
-                + " token integer not null, "
                 + " primary key(id));"
         );
     }

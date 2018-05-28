@@ -12,6 +12,10 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+
+import javax.crypto.NoSuchPaddingException;
 
 public class VoteParticipationActivity extends AppCompatActivity {
     EditText vote_name_Text;
@@ -24,7 +28,7 @@ public class VoteParticipationActivity extends AppCompatActivity {
         vote_name_Text = (EditText) findViewById(R.id.vote_name_Text);
     }
 
-    public void onButtonMenu(View view) throws IOException {
+    public void onButtonMenu(View view) throws IOException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException {
         String vote_name = vote_name_Text.getText().toString();
 
         Intent MenuIntent = new Intent(VoteParticipationActivity.this, MenuActivity.class);
@@ -35,7 +39,7 @@ public class VoteParticipationActivity extends AppCompatActivity {
             myApp.subject = subject;
             openDatabase();
             createTable(subject);
-
+            getData();
             open_socket();
             startActivity(MenuIntent);
 
@@ -56,12 +60,18 @@ public class VoteParticipationActivity extends AppCompatActivity {
         }
     }
 
-    private void get_data() {
-        new GetDataBase().selectChain(myApp.subject);
+    private void getData() throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException {
+        GetDataBase gd = new GetDataBase();
+        gd.selectChain(myApp.subject+"_chain");
+        gd.selectUserInfo();
+        gd.selectUsers(myApp.subject+"_users");
+        gd.selectVoters(myApp.subject+"_voters");
+        gd.selectCandidates(myApp.subject+"_candidates");
+
     }
 
     private void open_socket() throws IOException {
-        myApp.vb = new vote_block(myApp.merkle_tree, myApp.current_transactions, myApp.voters, myApp.users);
+        myApp.vb = new vote_block(myApp.merkle_tree, myApp.current_transactions, myApp.voters, myApp.nodes);
         myApp.vc = new vote_chain(myApp.chain);
         myApp.cs = new clientSocket(myApp.subject, myApp.udp_sock, myApp.id, myApp.users, myApp.chainlist, myApp.addrlist);
         myApp.ss = new serverSocket(myApp.vb, myApp.vc, myApp.tcp_sock, myApp.udp_sock, myApp.chain, myApp.current_transactions, myApp.subject, myApp.users, myApp.cs);
@@ -123,5 +133,14 @@ public class VoteParticipationActivity extends AppCompatActivity {
         db.execSQL("create table if not exists " + name + "("
                 + " candidate text not null, "
                 + " primary key(candidate));");
+    }
+
+    private void createusersTable(String subject) {
+        String name = subject+ "_user_info";
+        db.execSQL("create table if not exists " + name + "("
+                + " id text not null, "
+                + " pk text not null, "
+                + " primary key(id));"
+        );
     }
 }

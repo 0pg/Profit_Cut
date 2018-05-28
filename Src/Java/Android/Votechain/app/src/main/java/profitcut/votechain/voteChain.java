@@ -2,6 +2,7 @@ package profitcut.votechain;
 
 import java.io.Serializable;
 import java.security.MessageDigest;
+import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -266,15 +267,15 @@ class vote_block {
     LinkedHashMap<Integer, String> merkle_tree;
     ArrayList<HashMap> current_transactions;
     ArrayList<String> voters;
-    HashMap<String, HashMap> users;
+    HashMap<String, Integer> nodes;
 
     public vote_block(LinkedHashMap<Integer, String> merkle_tree, ArrayList<HashMap> current_transactions,
-                      ArrayList<String> voters, HashMap<String, HashMap> users) {
+                      ArrayList<String> voters, HashMap<String, Integer> nodes) {
         super();
         this.merkle_tree = merkle_tree;
         this.current_transactions = current_transactions;
         this.voters = voters;
-        this.users = users;
+        this.nodes = nodes;
     }
 
     public void setCurrent_transactions(ArrayList<HashMap> current_transactions) {
@@ -290,12 +291,11 @@ class vote_block {
     }
 
     public boolean check_voters(String voter) {
-        int token = (Integer)this.users.get(voter).get("token");
+        int token = (Integer)this.nodes.get(voter);
         if(this.voters.contains(voter)) {
-            this.users.get(voter).put("token", token + 1);
             return false;
         }
-        if(token < 0) {
+        if(token <= 0) {
             return false;
         }
         return true;
@@ -303,22 +303,20 @@ class vote_block {
 
     public HashMap<String, String> new_transaction(String voter, String candidate) {
         HashMap<String, String> transac = new HashMap<String, String>();
-        HashMap<String, Object> info = this.users.get(voter);
-        int token = (int)info.get("token");
         transac.put("voter", voter);
         transac.put("candidate", candidate);
-        info.put("token", token - 1);
 
         return transac;
     }
 
-    public boolean add_transaction(HashMap<String, String> transac, block_header bh) {
+    public boolean add_transaction(HashMap<String, String> transac) {
         String voter = transac.get("voter");
+        int token = this.nodes.get(voter);
         if(check_voters(voter)) {
             this.current_transactions.add(transac);
             transaction_record();
             update_voters(transac.get("voter"));
-
+            this.nodes.put(voter, token -1 );
             return true;
         }
         return false;
@@ -356,10 +354,9 @@ class vote_block {
     }
 
     public static boolean valid_proof(block_header block_h) {
-        String guess_hash = hash(block_h.toString());
-        if(guess_hash.substring(0, 4).equals("0000")) return true;
-        else return false;
-
+            String guess_hash = hash(block_h.toString());
+            if(guess_hash.substring(0, 4).equals("0000")) return true;
+            else return false;
     }
 
     public float deadline(int year, int month, int day, int hour) {

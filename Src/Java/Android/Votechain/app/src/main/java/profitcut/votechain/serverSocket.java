@@ -103,7 +103,7 @@ public class serverSocket implements Runnable{
             String sender = (String) data.get("sender");
             String encrypt_num = (String) data.get("encrypted");
             PublicKey key = (PublicKey) this.attendances.get(sender).get("Key");
-            if(!rsa.decryption(encrypt_num, key).equals("false")) {
+            if(!rsa.decryption(encrypt_num, key).equals("false") && vb.add_transaction(transac)) {
                 this.transacs.add(transac);
                 byte[] pack = message_serialize2(data);
                 cs.broadcast(pack);

@@ -24,7 +24,6 @@ public class dbHelper extends SQLiteOpenHelper {
             name = "user_info";
             db.execSQL("create table if not exists " + name + "("
                     + " id text not null, "
-                    + " pk text not null, "
                     + " token integer not null, "
                     + " primary key(id));"
             );

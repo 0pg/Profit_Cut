@@ -33,6 +33,12 @@ public class clientSocket {
     private ArrayList<InetAddress> addrlist;
     private ArrayList<ArrayList> chainlist;
 
+    public clientSocket (String user, DatagramSocket udp_sock) {
+        this.udp_sock = udp_sock;
+        this.udp_port = 12222;
+        this.user = user;
+    }
+
     public clientSocket (String subject, DatagramSocket udp_sock,
                           String user, HashMap users, ArrayList<ArrayList> chainlist, ArrayList<InetAddress> addrlist) throws SocketException {
         this.udp_sock = udp_sock;
