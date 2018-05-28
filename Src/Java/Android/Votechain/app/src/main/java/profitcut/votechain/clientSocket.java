@@ -115,7 +115,7 @@ public class clientSocket {
     public void broadcast_newbie(PublicKey puk, PrivateKey pk) throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
         HashMap<String, Object> data = new HashMap<>();
         getRsa rsa = new getRsa();
-        data.put("Profit_Cut_newbie"+this.subject, this.user);
+        data.put("Profit_Cut_newbie", this.user);
         data.put("encrypted", encrypt(pk));
         data.put("Key", rsa.encode_base64(puk.getEncoded()) );
         byte[] serializedMessage = message_serialize(data);
