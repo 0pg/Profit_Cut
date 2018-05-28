@@ -34,6 +34,7 @@ public class server_socket implements Runnable{
 	private ArrayList<Object> chains;
 	private String subject;
 	private HashMap<String, HashMap> attendances; 
+	private client_socket cs;
 	
 	public ArrayList<HashMap> getTransacs() {
 		return transacs;
@@ -51,7 +52,7 @@ public class server_socket implements Runnable{
 		return attendances;
 	}
 
-	public server_socket(vote_block vb, vote_chain vc, ServerSocket tcp_sock, DatagramSocket udp_sock, ArrayList<Object> chains, ArrayList<HashMap> transacs, String subject, HashMap attendances) throws IOException {
+	public server_socket(vote_block vb, vote_chain vc, ServerSocket tcp_sock, DatagramSocket udp_sock, ArrayList<Object> chains, ArrayList<HashMap> transacs, String subject, HashMap attendances, client_socket cs) throws IOException {
 		super();
 		this.vb = vb;
 		this.vc = vc;
@@ -62,13 +63,15 @@ public class server_socket implements Runnable{
 		this.blocks = new ArrayList<block>();
 		this.chains = chains;
 		this.attendances = attendances;
+		this.cs = cs;
 	}
 	
 	private void udp_server() throws IOException, ClassNotFoundException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeySpecException, InterruptedException {
 		byte[] buf = new byte[2048];
 		DatagramPacket packet = new DatagramPacket(buf, buf.length);
+		System.out.println(packet.getAddress());
 		this.udp_sock.receive(packet);
-		
+
 		ObjectInputStream iStream = new ObjectInputStream(new ByteArrayInputStream(packet.getData()));
 		HashMap data = (HashMap)iStream.readObject();
 		iStream.close();
@@ -77,7 +80,14 @@ public class server_socket implements Runnable{
 		int port = packet.getPort();
 		packet = new DatagramPacket(buf, buf.length, address, port);
 		
-		if(data.containsKey("Profit_Cut?"+subject)) {
+		if(data.containsKey("Profit_Cut?")){
+			buf = "Profit_OK".getBytes();
+			packet = new DatagramPacket(buf, buf.length, address, 12222);
+			this.udp_sock.send(packet);
+			ThreadHandler3 th3 = new ThreadHandler3();
+			th3.start();
+		}
+		else if(data.containsKey("Profit_Cut?"+subject)) {
 			buf = "Profit_OK".getBytes();
 			packet = new DatagramPacket(buf, buf.length, address, 12222);
 			this.udp_sock.send(packet);
@@ -92,16 +102,20 @@ public class server_socket implements Runnable{
 			PublicKey key = (PublicKey) this.attendances.get(sender).get("Key");
 			if(!rsa.decryption(encrypt_num, key).equals("false")) {
 				this.transacs.add(transac);
+				byte[] pack = message_serialize2(data);
+				cs.broadcast(pack);
 			}
 		}
 		else if(data.containsKey("Profit_Cut_block"+subject)) {
 			block b = (block) data.get("Profit_Cut_block"+subject);
 			if(vb.valid_block(b, this.chains)) {
 				vc.add_block(b);
+				byte[] pack = message_serialize2(data);
+				cs.broadcast(pack);
 			}
 		}
-		else if(data.containsKey("Profit_Cut_newbie"+subject)) {
-			String account = (String)data.get("Profit_Cut_newbie"+subject);
+		else if(data.containsKey("Profit_Cut_newbie")) {
+			String account = (String)data.get("Profit_Cut_newbie");
 			String encrypted = (String)data.get("encrypted");
 			getRsa rsa = new getRsa();
 			PublicKey key = (PublicKey)(rsa.decode_publickey((String)(data.get("Key"))));
@@ -125,10 +139,31 @@ public class server_socket implements Runnable{
 		}
 	}
 	
+	private void tcp_send_attendance() throws IOException, InterruptedException {
+		while(true) {
+			byte[] att = message_serialize2(this.attendances);
+			Socket socket = this.tcp_sock.accept();
+			ThreadHandler handler = new ThreadHandler(socket, att);
+			handler.start();
+			handler.join();
+		}
+	}
+
 	private byte[] message_serialize(ArrayList chain) throws IOException {
 		ByteArrayOutputStream bStream = new ByteArrayOutputStream();
 		ObjectOutput oo = new ObjectOutputStream(bStream); 
 		oo.writeObject(chain);
+		byte[] serializedMessage = bStream.toByteArray();
+		oo.flush();
+		oo.close();
+
+		return serializedMessage;
+	}
+	
+	private byte[] message_serialize2(HashMap attend) throws IOException {
+		ByteArrayOutputStream bStream = new ByteArrayOutputStream();
+		ObjectOutput oo = new ObjectOutputStream(bStream); 
+		oo.writeObject(attend);
 		byte[] serializedMessage = bStream.toByteArray();
 		oo.flush();
 		oo.close();
@@ -182,7 +217,18 @@ public class server_socket implements Runnable{
 			}
 		}
 	}
-
+	
+	class ThreadHandler3 extends Thread{
+		public void run() {
+			try {
+				tcp_send_attendance();
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+	}
 }
 	
 

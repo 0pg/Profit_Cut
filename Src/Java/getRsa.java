@@ -59,7 +59,6 @@ public class getRsa {
 	
 	public byte[] encryption(String input, PrivateKey privatekey) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
 		KeyPair keypair = get_keyPair();
-//		Key privatekey = get_private();
 		this.cipher.init(Cipher.ENCRYPT_MODE, privatekey);
 		byte[] arrCipherData = this.cipher.doFinal(input.getBytes());
 		String encrypted = new String(arrCipherData);
@@ -70,7 +69,6 @@ public class getRsa {
 	public String decryption(String encrypted, PublicKey key) {
 		try {
 			KeyPair keypair = get_keyPair();
-//			Key publickey = decode_publickey(key);
 			byte[] encrypt = decode_base64(encrypted);
 			this.cipher.init(Cipher.DECRYPT_MODE, key);
 			byte[] arrCipherData = this.cipher.doFinal(encrypt);
@@ -81,26 +79,6 @@ public class getRsa {
 			return "false";
 		}
 	}
-	
-//	public HashMap pkToString(PrivateKey key) throws InvalidKeySpecException {
-//		RSAPrivateKeySpec privatespec = get_privateSpec(key);
-//		String privateKeyModulus = privatespec.getModulus().toString(16);
-//		String privateKeyExponent = privatespec.getPrivateExponent().toString(16);
-//		HashMap<String, String> keyset = new HashMap<>();
-//		keyset.put("Modulus", privateKeyModulus);
-//		keyset.put("Exponent", privateKeyExponent);
-//		
-//		return keyset;
-//	}
-//	
-//	public PrivateKey stringToPk(HashMap keyset) throws InvalidKeySpecException {
-//		BigInteger modulus = new BigInteger((String) keyset.get("Modulus"), 16);
-//		BigInteger exponent = new BigInteger((String)keyset.get("Exponent"), 16);
-//		RSAPrivateKeySpec pks = new RSAPrivateKeySpec(modulus, exponent);
-//		
-//		PrivateKey pk = this.keyFactory.generatePrivate(pks);
-//		return pk;
-//	}
 	
 	public Key decode_publickey(String key) throws InvalidKeySpecException {
 		X509EncodedKeySpec x509Spec = new X509EncodedKeySpec(decode_base64(key)); 
@@ -131,10 +109,9 @@ public class getRsa {
 		getRsa rsa1 = new getRsa();
 		PublicKey k = (PublicKey) rsa1.get_public();
 		String pk = rsa.encode_base64(rsa.get_private().getEncoded());
+		System.out.println(pk);
 		PrivateKey prk = (PrivateKey) rsa.decode_privateKey(pk);
 		byte[] a = rsa.encryption(msg, prk);
 		String b = rsa.decryption(rsa.encode_base64(a), k);
-	}
-	
-	
+	}	
 }

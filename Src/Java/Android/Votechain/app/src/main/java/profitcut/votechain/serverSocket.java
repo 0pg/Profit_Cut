@@ -117,8 +117,8 @@ public class serverSocket implements Runnable{
                 cs.broadcast(pack);
             }
         }
-        else if(data.containsKey("Profit_Cut_newbie"+subject)) {
-            String account = (String)data.get("Profit_Cut_newbie"+subject);
+        else if(data.containsKey("Profit_Cut_newbie")) {
+            String account = (String)data.get("Profit_Cut_newbie");
             String encrypted = (String)data.get("encrypted");
             getRsa rsa = new getRsa();
             PublicKey key = (PublicKey)(rsa.decode_publickey((String)(data.get("Key"))));
