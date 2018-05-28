@@ -1,8 +1,10 @@
 package profitcut.votechain;
 
 import android.app.Activity;
+import android.app.Application;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -11,14 +13,12 @@ import android.widget.Toast;
 
 public class VoteParticipationActivity extends AppCompatActivity {
     EditText vote_name_Text;
-
     SQLiteDatabase db;
-
+    MyApplication myApp = (MyApplication) getApplication();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_vote_participation);
-
         vote_name_Text = (EditText) findViewById(R.id.vote_name_Text);
     }
 
@@ -27,13 +27,12 @@ public class VoteParticipationActivity extends AppCompatActivity {
 
         Intent MenuIntent = new Intent(VoteParticipationActivity.this, MenuActivity.class);
 
-        if (vote_name.equals("")) {
+        if (vote_name.equals("execution")) {
         // if (vote_name.equals("컴퓨터과학과")) {
             String subject = vote_name;
-
+            myApp.subject = subject;
             openDatabase();
             createTable(subject);
-
             startActivity(MenuIntent);
         } else {
             Toast.makeText(getApplicationContext(), "존재하지 않는 투표입니다.", Toast.LENGTH_LONG). show();
@@ -52,6 +51,14 @@ public class VoteParticipationActivity extends AppCompatActivity {
         }
     }
 
+    private void get_data() {
+        new GetDataBase().selectChain(myApp.subject);
+    }
+
+    private void open_socket() {
+
+    }
+
     private void createTable(String subject) {
         createchainTable(subject);
         createtransaction_poolTable(subject);
@@ -64,14 +71,14 @@ public class VoteParticipationActivity extends AppCompatActivity {
         String name = subject + "_chain";
         db.execSQL("create table if not exists " + name + "("
                 + " idx integer not null, "
-                + " deadline real not null, "
-                + " subject text not null, "
-                + " constructor text not null, "
+                + " deadline real not null default '0', "
+                + " subject text not null default '-', "
+                + " constructor text not null default '-', "
                 + " ver text not null, "
                 + " time real not null, "
-                + " proof integer not null, "
-                + " previous_hash text not null, "
-                + " merkle_root text not null, "
+                + " proof integer not null default '0', "
+                + " previous_hash text not null default '-', "
+                + " merkle_root text not null default '-', "
                 + " block_hash text not null, "
                 + " primary key(idx));");
     }

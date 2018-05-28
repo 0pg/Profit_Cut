@@ -24,84 +24,60 @@ import java.util.LinkedHashMap;
 import javax.crypto.NoSuchPaddingException;
 
 public class LoginActivity extends AppCompatActivity {
-    private String id;
-    private String prk;
-    private ServerSocket tcp_sock;
-    private DatagramSocket udp_sock;
-    {
-        try {
-            tcp_sock = new ServerSocket(12223);
-            udp_sock = new DatagramSocket(12222);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-    private ArrayList<Object> chain = new ArrayList<>();
-    private ArrayList<HashMap> current_transactions = new ArrayList<>();
-    private ArrayList<String> voters = new ArrayList<>();
-    private ArrayList<String> candidates = new ArrayList<>();
-    private ArrayList<ArrayList> chainlist = new ArrayList<>();
-    private LinkedHashMap<Integer, String> merkle_tree = new LinkedHashMap<>();
-    private HashMap<String, HashMap> participations = new HashMap<>();
     SQLiteDatabase db;
-
+    dbHelper dh = new dbHelper(this);
+    MyApplication myApp = (MyApplication)getApplication();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
         createDatabase();
-        user_infoTable();
-//        GetDataBase gd = new GetDataBase();
-//        PutDataBase pd = new PutDataBase();
-//        ArrayList<Object> info1 = (ArrayList)gd.selectIdentifier("identifier");
-//        System.out.println(info1.toString());
-        String info1 = new TestActivity().selectTest();
-        if(info1.length() > 1){
-            ArrayList<String> info = (ArrayList)new GetDataBase().selectIdentifier("identifier");
-            Toast.makeText(getApplicationContext(), info1, Toast.LENGTH_LONG). show();
-            info = (ArrayList)new GetDataBase().selectIdentifier("identifier");
-                this.id = info.get(0);
-                this.prk = info.get(1);
-                Intent ParticipationIntent = new Intent(LoginActivity.this, VoteParticipationActivity.class);
-                startActivity(ParticipationIntent);
-        }else{
-            Toast.makeText(getApplicationContext(), "failed", Toast.LENGTH_LONG).show();
-            identifierTable();
-            TelephonyManager telManager = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
-            String num = telManager.getLine1Number();
-            getRsa rsa = null;
-            try {
-                rsa = new getRsa();
-            } catch (NoSuchAlgorithmException e) {
-                Toast.makeText(getApplicationContext(), "failed2", Toast.LENGTH_LONG).show();
-            } catch (NoSuchPaddingException e) {
-                Toast.makeText(getApplicationContext(), "failed3", Toast.LENGTH_LONG).show();
+
+        db = dh.getWritableDatabase();
+        Cursor c = db.rawQuery("select * from identifier", null);
+        if (c.getCount() > 0) {
+            while(c.moveToNext()){
+                myApp.id = (c.getString(c.getColumnIndex("id")));
+                myApp.prk = (c.getString(c.getColumnIndex("prk")));
             }
-            PublicKey Puk = (PublicKey) rsa.get_public();
-            PrivateKey Prk = (PrivateKey) rsa.get_private();
-            String id = vote_block.hash(num);
-            String puk = rsa.encode_base64(Puk.getEncoded());
-            String prk = rsa.encode_base64(Prk.getEncoded());
-            System.out.println(prk);
-            System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-            new PutDataBase().insertIdentifier("identifier", id, prk);
-            ArrayList<Object> info = (ArrayList)new GetDataBase().selectIdentifier("identifier");
-
+            Toast.makeText(getApplicationContext(),c.getColumnNames().toString(),Toast.LENGTH_LONG);
+            Intent ParticipationIntent = new Intent(LoginActivity.this, VoteParticipationActivity.class);
+            startActivity(ParticipationIntent);
         }
-
     }
 
-
     public void onButtonTest(View view) {
-        Intent TestIntent = new Intent(LoginActivity.this, TestActivity.class);
-        startActivity(TestIntent);
+
     }
 
     public void onButtonAuthentication(View view) {
-        Intent ParticipationIntent = new Intent(LoginActivity.this, VoteParticipationActivity.class);
+        TelephonyManager telManager = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
+        String num = telManager.getLine1Number();
+        Toast.makeText(getApplicationContext(), num, Toast.LENGTH_LONG);
+        getRsa rsa = null;
+        try {
+            rsa = new getRsa();
+        } catch (NoSuchAlgorithmException e) {
+            Toast.makeText(getApplicationContext(), "failed2", Toast.LENGTH_LONG).show();
+        } catch (NoSuchPaddingException e) {
+            Toast.makeText(getApplicationContext(), "failed3", Toast.LENGTH_LONG).show();
+        }
+        PublicKey Puk = (PublicKey) rsa.get_public();
+        PrivateKey Prk = (PrivateKey) rsa.get_private();
+        String id = vote_block.hash(num);
+        String puk = rsa.encode_base64(Puk.getEncoded());
+        String prk = rsa.encode_base64(Prk.getEncoded());
+        try {
+            new PutDataBase(dh).insertIdentifier(id, prk);
+            new PutDataBase(dh).insertUserInfo(id, puk, 1);
+        } catch (Exception e) {
 
-        startActivity(ParticipationIntent);
+        }
+        myApp.id = id;
+        myApp.prk = prk;
+        Intent ParticipationActivity = new Intent(LoginActivity.this, VoteParticipationActivity.class);
+        startActivity(ParticipationActivity);
     }
 
     private void createDatabase() {
@@ -113,18 +89,24 @@ public class LoginActivity extends AppCompatActivity {
                     Activity.MODE_PRIVATE,
                     null);
 
-            Toast.makeText(getApplicationContext(), "" + name + " Database 생성 ", Toast.LENGTH_LONG). show();
         } catch (Exception ex) {
             Toast.makeText(getApplicationContext(), "" + name + " Database 생성 오류", Toast.LENGTH_LONG). show();
         }
     }
 
-    private void identifierTable() {
-        String name = "identifier";
-        db.execSQL("create table if not exists " + name + "("
-                + " id text not null, "
-                + " prk text not null);"
-    //            + " primary key(id));"
+    private void createChainTable(String subject) {
+        db.execSQL("create table if not exists cahin_" + subject + "("
+                + " idx INTEGER not null, "
+                + " deadline REAL not null default '0', "
+                + " subject TEXT not null default '-', "
+                + " constructor TEXT not null default '-', "
+                + " ver TEXT not null, "
+                + " time REAL not null, "
+                + " proof INTEGER not null default '0', "
+                + " previous_hash TEXT not null default '-', "
+                + " merkle_tree TEXT not null default '-', "
+                + " block_hash TEXT not null, "
+                + " primary key(idx));"
         );
     }
 

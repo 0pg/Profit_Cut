@@ -2,6 +2,9 @@ package profitcut.votechain;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
@@ -9,7 +12,9 @@ import android.view.View;
 import android.widget.Toast;
 
 public class TestActivity extends AppCompatActivity {
-
+    private static int DATABASE_VERSION = 1;
+    private DatabaseHelper dbHelper;
+    private SQLiteDatabase db;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -20,11 +25,6 @@ public class TestActivity extends AppCompatActivity {
         Intent ReturnIntent = new Intent(TestActivity.this, LoginActivity.class);
 
         TelephonyManager telManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-        Intent ReturnIntent = new Intent(TestActivity.this, LoginActivity.class);;
         startActivity(ReturnIntent);
     }
 
@@ -34,63 +34,33 @@ public class TestActivity extends AppCompatActivity {
 
     public String selectTest() {
         String[] columns = {"id", "pk", "token"};
-        Cursor c1 = db.query("user_info", columns, null, null, null, null, null);
-
+        Cursor c1 = db.rawQuery("select * from identifier", null);
         int recordCount = c1.getCount();
-=======
-        String PhoneNum = telManager.getLine1Number();
->>>>>>> parent of 0a64137... Add SQLiteOpenHelper
+        String id = c1.getString(0);
+        String pk = c1.getString(1);
 
-        Toast.makeText(getApplicationContext(), PhoneNum, Toast.LENGTH_LONG). show();
-
-<<<<<<< HEAD
-        Toast.makeText(getApplicationContext(), id + pk + Integer.toString(token), Toast.LENGTH_LONG). show();
+        Toast.makeText(getApplicationContext(), "as", Toast.LENGTH_LONG). show();
 
         c1.close();
         return pk;
     }
 
+
     private void openDatabase() {
         dbHelper = new DatabaseHelper(this);
         db = dbHelper.getWritableDatabase();
     }
-
     private class DatabaseHelper extends SQLiteOpenHelper {
         public DatabaseHelper(Context context) {
             super(context, "profitcut", null, DATABASE_VERSION);
         }
 
         public void onCreate(SQLiteDatabase db) {
-            db.execSQL("create table if not exists " + "user_info" + "("
-                    + " id text not null, "
-                    + " pk text not null, "
-                    + " token integer not null, "
-                    + " primary key(id));"
-            );
-
-            db.execSQL("insert into user_info (id, pk, token) values ('test', 'test2', 10);");
         }
         public void onOpen(SQLiteDatabase db) {
         }
 
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         }
-=======
-        startActivity(ReturnIntent);
->>>>>>> parent of 0a64137... Add SQLiteOpenHelper
-=======
-        String PhoneNum = telManager.getLine1Number();
-
-        Toast.makeText(getApplicationContext(), PhoneNum, Toast.LENGTH_LONG). show();
-
-        startActivity(ReturnIntent);
->>>>>>> parent of 0a64137... Add SQLiteOpenHelper
-=======
-        String PhoneNum = telManager.getLine1Number();
-
-        Toast.makeText(getApplicationContext(), PhoneNum, Toast.LENGTH_LONG). show();
-
-        startActivity(ReturnIntent);
->>>>>>> parent of 0a64137... Add SQLiteOpenHelper
     }
 }

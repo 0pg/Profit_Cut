@@ -12,6 +12,14 @@ class genesisblock_header implements Serializable{
     private int index;
     private float time;
     private float deadline;
+
+    public genesisblock_header(String ver, int index, float time, float deadline) {
+        super();
+        this.ver = ver;
+        this.index = index;
+        this.time = time;
+        this.deadline = deadline;
+    }
     public genesisblock_header(String ver, float deadline) {
         super();
         this.ver = ver;
@@ -19,6 +27,7 @@ class genesisblock_header implements Serializable{
         this.time = Calendar.getInstance().getTimeInMillis() / 1000;
         this.deadline = deadline;
     }
+
     public int getIndex() {
         return index;
     }
@@ -45,6 +54,16 @@ class genesisblock implements Serializable{
     private String constructor;
     private ArrayList<String> candidates;
     private genesisblock_header genesis_h;
+
+    public genesisblock(String block_hash, String subject, String constructor, ArrayList<String> candidates,
+                        genesisblock_header genesis_h) {
+        super();
+        this.block_hash = block_hash;
+        this.subject = subject;
+        this.constructor = constructor;
+        this.candidates = candidates;
+        this.genesis_h = genesis_h;
+    }
 
     public genesisblock(String constructor,String subject, ArrayList candidates, genesisblock_header genesis_h) {
         super();
@@ -96,6 +115,15 @@ class block_header implements Serializable{
     private String previous_hash;
     private String merkle_root;
 
+    public block_header(String ver, int index, int proof, float time, String previous_hash, String merkle_root) {
+        super();
+        this.ver = ver;
+        this.index = index;
+        this.proof = proof;
+        this.time = time;
+        this.previous_hash = previous_hash;
+        this.merkle_root = merkle_root;
+    }
     public block_header(String ver, int index, String previous_hash, String merkle_root) {
         super();
         this.ver = ver;
@@ -145,6 +173,15 @@ class block implements Serializable{
     private HashMap<Integer, String> merkle_tree;
     private block_header block_h;
 
+
+    public block(String block_hash, ArrayList<HashMap> transaction_pool, HashMap<Integer, String> merkle_tree,
+                 block_header block_h) {
+        super();
+        this.block_hash = block_hash;
+        this.transaction_pool = transaction_pool;
+        this.merkle_tree = merkle_tree;
+        this.block_h = block_h;
+    }
 
     public block(ArrayList<HashMap> transaction_pool, HashMap<Integer, String> merkle_tree,
                  block_header block_h) {
@@ -411,4 +448,3 @@ class vote_block {
         return Math.log10(x) / Math.log10(base);
     }
 }
-

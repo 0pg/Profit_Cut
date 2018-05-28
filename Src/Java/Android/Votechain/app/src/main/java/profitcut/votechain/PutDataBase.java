@@ -8,23 +8,22 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.support.v7.app.AppCompatActivity;
 
 public class PutDataBase extends AppCompatActivity {
-    private static int DATABASE_VERSION = 1;
-    private DatabaseHelper dbHelper;
-    private SQLiteDatabase db;
-    public PutDataBase() {
+    SQLiteDatabase db;
+    SQLiteOpenHelper dh;
+    public PutDataBase(SQLiteOpenHelper dh) {
         super();
-
-        openDatabase();
+        this.dh = dh;
+        this.db = this.dh.getWritableDatabase();
     }
 
-    public void insertUserInfo(String name, String id, String pk, int token) {
+    public void insertUserInfo( String id, String pk, int token) {
         ContentValues recordValues = new ContentValues();
 
         recordValues.put("id", id);
         recordValues.put("pk", pk);
         recordValues.put("token", token);
 
-        db.insert(name, null, recordValues);
+        db.insert("user_info", null, recordValues);
     }
 
     public void insertChain(String name, int idx, float deadline, String subject, String constructor, String ver, float time, int proof, String previous_hash, String merkle_root, String block_hash) {
@@ -80,10 +79,10 @@ public class PutDataBase extends AppCompatActivity {
         db.insert(name, null, recordValues);
     }
 
-    public void insertIdentifier(String name, String id, String prk) {
+    public void insertIdentifier( String id, String prk) {
         ContentValues recoValues = new ContentValues();
 
-        String sql = "insert into " + name + " values('" + id +"', '" + prk +"');";
+        String sql = "insert into identifier values('" + id +"', '" + prk +"');";
         System.out.println(sql);
         db.execSQL(sql);
     }
@@ -122,22 +121,5 @@ public class PutDataBase extends AppCompatActivity {
         String [] whereArgs = {Integer.toString(idx)};
 
         db.delete(name, "idx = ?", whereArgs);
-    }
-    private void openDatabase() {
-        dbHelper = new DatabaseHelper(this);
-        db = dbHelper.getWritableDatabase();
-    }
-    private class DatabaseHelper extends SQLiteOpenHelper {
-        public DatabaseHelper(Context context) {
-            super(context, "profitcut", null, DATABASE_VERSION);
-        }
-
-        public void onCreate(SQLiteDatabase db) {
-        }
-        public void onOpen(SQLiteDatabase db) {
-        }
-
-        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        }
     }
 }

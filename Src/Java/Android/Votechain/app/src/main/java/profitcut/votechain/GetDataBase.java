@@ -3,25 +3,27 @@ package profitcut.votechain;
 import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.support.v7.app.AppCompatActivity;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class GetDataBase extends AppCompatActivity {
-    private static int DATABASE_VERSION = 1;
-    private DatabaseHelper dbHelper;
-    private SQLiteDatabase db;
+    SQLiteDatabase db;
+    SQLiteOpenHelper dh;
+    MyApplication myApp = (MyApplication)getApplication();
+
     public GetDataBase() {
         super();
-
-        openDatabase();
     }
 
     public ArrayList selectUserInfo(String name) {
         String[] columns = {"id", "pk", "token"};
-        ArrayList<Object> array = new ArrayList<>();
+        ArrayList<HashMap> array = new ArrayList<>();
+        HashMap<String, Object> map = new HashMap<>();
         Cursor c1 = db.query(name, columns, null, null, null, null, null);
 
         int recordCount = c1.getCount();
@@ -36,60 +38,65 @@ public class GetDataBase extends AppCompatActivity {
         return array;
     }
 
-    public ArrayList selectChain(String name) {
+    public void selectChain(String name) {
         String[] columns = {"idx", "deadline", "subject", "constructor", "ver", "time", "proof", "precious_hash", "merkle_root", "block_hash"};
         ArrayList<Object> array = new ArrayList<>();
-        Cursor c1 = db.query(name, columns, null, null, null, null, null);
+        Cursor c1 = db.query(name+"_chain", columns, null, null, null, null, null);
 
         int recordCount = c1.getCount();
+        c1.moveToNext();
+        array.add(new genesisblock(c1.getString(c1.getColumnIndex("block_hash")), c1.getString(c1.getColumnIndex("subject")),
+                selectCandidates(name), new genesisblock_header(c1.getString(c1.getColumnIndex("ver")), c1.getInt(c1.getColumnIndex("idx")),
+                c1.getFloat(c1.getColumnIndex("time")), c1.getFloat(c1.getColumnIndex("deadline")))));
+        while(c1.moveToNext()){
+            array.add(new block(c1.getString(c1.getColumnIndex("block_hash")),
+                    selectTransactionPool(name, c1.getInt(c1.getColumnIndex("idx"))), selectMerkle(name, c1.getInt(c1.getColumnIndex("idx")))
+                    , new block_header(c1.getString(c1.getColumnIndex("ver"))
+                    , c1.getInt(c1.getColumnIndex("idx"))
+                    , c1.getInt(c1.getColumnIndex("proof"))
+                    , c1.getFloat(c1.getColumnIndex("time"))
+                    , c1.getString(c1.getColumnIndex("previous_hash"))
+                    ,c1.getString(c1.getColumnIndex("merkle_root")))));
 
-        for (int i = 0; i < recordCount * 10; i += 10) {
-            c1.moveToNext();
-            array.add(i, c1.getInt(0));
-            array.add(i + 1, c1.getFloat(1));
-            array.add(i + 2, c1.getString(2));
-            array.add(i + 3, c1.getString(3));
-            array.add(i + 4, c1.getString(4));
-            array.add(i + 5, c1.getFloat(5));
-            array.add(i + 6, c1.getInt(6));
-            array.add(i + 7, c1.getString(7));
-            array.add(i + 8, c1.getString(8));
-            array.add(i + 9, c1.getString(9));
         }
 
-        return array;
+        myApp.chain = array;
     }
 
-    public ArrayList selectTransactionPool(String name) {
+    public ArrayList selectTransactionPool(String name, int idx) {
         String[] columns = {"idx", "voter", "candidate"};
-        ArrayList<Object> array = new ArrayList<>();
-        Cursor c1 = db.query(name, columns, null, null, null, null, null);
-
-        int recordCount = c1.getCount();
-
-        for (int i = 0; i < recordCount * 3; i += 3) {
-            c1.moveToNext();
-            array.add(i, c1.getInt(0));
-            array.add(i + 1, c1.getString(1));
-            array.add(i + 2, c1.getString(2));
+        ArrayList<HashMap> array = new ArrayList<>();
+        HashMap<String, String> map = new HashMap<>();
+        Cursor c1 = db.rawQuery("select voter, candidate from "+name+"_transaction_pool where idx="+idx, null);
+        while(c1.moveToNext()) {
+            map.put("voter", c1.getString(c1.getColumnIndex("voter")));
+            map.put("candidate", c1.getString(c1.getColumnIndex("candidate")));
+            array.add(map);
         }
-
         return array;
     }
 
     public ArrayList selectVoters(String name) {
         String[] columns = {"account"};
-        ArrayList<Object> array = new ArrayList<>();
+        ArrayList<String> array = new ArrayList<>();
         Cursor c1 = db.query(name, columns, null, null, null, null, null);
 
-        int recordCount = c1.getCount();
+        while(c1.moveToNext()) {
+            array.add(c1.getString(0));
+        }
+        myApp.voters = array;
+        return array;
+    }
 
-        for (int i = 0; i < recordCount; i++) {
-            c1.moveToNext();
-            array.add(i, c1.getString(0));
+    public HashMap selectMerkle(String name, int idx) {
+        String[] colums = {"idx", "node_idx", "transaction_hash"};
+        HashMap<Integer, String> map = new HashMap<>();
+        Cursor c1 = db.rawQuery("select node_idx, transaction_hash from "+name+" where idx="+idx, null);
+        while(c1.moveToNext()){
+            map.put(c1.getInt(0), c1.getString(1));
         }
 
-        return array;
+        return map;
     }
 
     public ArrayList selectCandidates(String name) {
@@ -106,42 +113,22 @@ public class GetDataBase extends AppCompatActivity {
         return array;
     }
 
-    public Object selectIdentifier(String name) {
+    public Object selectIdentifier() {
         String[] colums = {"id", "prk"};
         ArrayList<Object> array = new ArrayList<>();
-        String sql = "select * from " + name;
-        System.out.println(sql);
+        String sql = "select * from identifier";
         Cursor c1 = db.rawQuery(sql, null);
 
         int recordCount = c1.getCount();
 
-        if(c1.moveToFirst()){
+        if (c1.moveToFirst()) {
             array.add(c1.getString(0));
             array.add(c1.getString(1));
         }
 
-        if(recordCount == 0)
+        if (recordCount == 0)
             return false;
         else
             return array;
     }
-
-    private void openDatabase() {
-        dbHelper = new DatabaseHelper(this);
-        db = dbHelper.getReadableDatabase();
-    }
-    private class DatabaseHelper extends SQLiteOpenHelper {
-        public DatabaseHelper(Context context) {
-            super(context, "profitcut", null, DATABASE_VERSION);
-        }
-
-        public void onCreate(SQLiteDatabase db) {
-        }
-        public void onOpen(SQLiteDatabase db) {
-        }
-
-        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        }
-    }
-
 }
