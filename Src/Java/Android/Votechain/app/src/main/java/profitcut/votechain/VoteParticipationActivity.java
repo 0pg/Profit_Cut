@@ -51,6 +51,12 @@ public class VoteParticipationActivity extends AppCompatActivity {
         Intent MenuIntent = new Intent(VoteParticipationActivity.this, MenuActivity.class);
         startActivity(MenuIntent);
     }
+
+    public void onButtonMake(View view) {
+        Intent MakeIntent = new Intent(VoteParticipationActivity.this, MakeVoteActivity.class);
+        startActivity(MakeIntent);
+    }
+
     private void createGenesis() {
         int index = 1;
         myApp.gh = new genesisblock_header(myApp.ver, index, Calendar.getInstance().getTimeInMillis() / 1000, myApp.deadline);

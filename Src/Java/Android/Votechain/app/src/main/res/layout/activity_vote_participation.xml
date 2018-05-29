@@ -33,7 +33,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
-            android:layout_marginTop="100dp">
+            android:layout_marginTop="120dp">
 
             <EditText
                 android:layout_width="280dp"
@@ -57,6 +57,18 @@
                 android:onClick="onButtonMenu"
                 android:text="투표 참여"
                 android:layout_marginTop="10dp"
+                android:layout_gravity="center" />
+
+            <Button
+                android:layout_width="280dp"
+                android:layout_height="wrap_content"
+                android:textSize="20dp"
+                android:textStyle="bold"
+                android:textColor="@color/colorPrimaryDark"
+                android:background="@color/colorPrimary"
+                android:onClick="onButtonMake"
+                android:text="투표 생성"
+                android:layout_marginTop="80dp"
                 android:layout_gravity="center" />
         </LinearLayout>
     </LinearLayout>
