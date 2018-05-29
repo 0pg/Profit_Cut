@@ -3,9 +3,11 @@ package profitcut.votechain;
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.support.v7.app.AppCompatActivity;
+import android.widget.Toast;
 
 public class PutDataBase extends AppCompatActivity {
     SQLiteDatabase db;
@@ -16,14 +18,23 @@ public class PutDataBase extends AppCompatActivity {
         this.db = this.dh.getWritableDatabase();
     }
 
-    public void insertUserInfo( String id, String pk, int token) {
+    public void insertUsers( String id, int token) {
         ContentValues recordValues = new ContentValues();
 
         recordValues.put("id", id);
-        recordValues.put("pk", pk);
         recordValues.put("token", token);
 
-        db.insert("user_info", null, recordValues);
+        db.insert("users", null, recordValues);
+    }
+
+    public void insertUserInfo( String id, String puk, String name) {
+        ContentValues recordValues = new ContentValues();
+        try {
+            String sql = "insert into " + name + " values('" + id + "', '" + puk + "');";
+            db.execSQL(sql);
+        } catch (SQLiteConstraintException e) {
+
+        }
     }
 
     public void insertChain(String name, int idx, float deadline, String subject, String constructor, String ver, float time, int proof, String previous_hash, String merkle_root, String block_hash) {

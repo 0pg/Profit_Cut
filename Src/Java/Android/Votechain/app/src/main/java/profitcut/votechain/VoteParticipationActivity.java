@@ -3,7 +3,9 @@ package profitcut.votechain;
 import android.app.Activity;
 import android.app.Application;
 import android.content.Intent;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -12,42 +14,46 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import java.io.IOException;
+import java.net.DatagramSocket;
+import java.net.ServerSocket;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.ArrayList;
+import java.util.Calendar;
 
 import javax.crypto.NoSuchPaddingException;
 
 public class VoteParticipationActivity extends AppCompatActivity {
     EditText vote_name_Text;
     SQLiteDatabase db;
+    dbHelper dh = new dbHelper(this);
     MyApplication myApp = (MyApplication) getApplication();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        db = dh.getWritableDatabase();
         setContentView(R.layout.activity_vote_participation);
         vote_name_Text = (EditText) findViewById(R.id.vote_name_Text);
     }
 
-    public void onButtonMenu(View view) throws IOException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException {
+    public void onButtonMenu(View view) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException {
         String vote_name = vote_name_Text.getText().toString();
-
-        Intent MenuIntent = new Intent(VoteParticipationActivity.this, MenuActivity.class);
-
-        if (vote_name.equals("execution")) {
-        // if (vote_name.equals("컴퓨터과학과")) {
-            String subject = vote_name;
-            myApp.subject = subject;
-            openDatabase();
-            createTable(subject);
-            getData();
-            open_socket();
-            startActivity(MenuIntent);
-
-        } else {
-            Toast.makeText(getApplicationContext(), "존재하지 않는 투표입니다.", Toast.LENGTH_LONG). show();
+        myApp.subject = vote_name;
+        createTable(myApp.subject);
+        new PutDataBase(dh).insertUserInfo(myApp.id, myApp.puk, myApp.subject+"_user_info");
+        if(!getData()){
+            createGenesis();
         }
+        Intent MenuIntent = new Intent(VoteParticipationActivity.this, MenuActivity.class);
+        startActivity(MenuIntent);
     }
-
+    private void createGenesis() {
+        int index = 1;
+        myApp.gh = new genesisblock_header(myApp.ver, index, Calendar.getInstance().getTimeInMillis() / 1000, myApp.deadline);
+        myApp.gb = new genesisblock(myApp.vb.hash(myApp.gh.toString()), myApp.subject, myApp.constructor, myApp.candidates ,myApp.gh);
+        myApp.chain.add(0, myApp.gb);
+    }
     private void openDatabase() {
         String name = "profitcut";
 
@@ -60,24 +66,6 @@ public class VoteParticipationActivity extends AppCompatActivity {
         }
     }
 
-    private void getData() throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException {
-        GetDataBase gd = new GetDataBase();
-        gd.selectChain(myApp.subject+"_chain");
-        gd.selectUserInfo();
-        gd.selectUsers(myApp.subject+"_users");
-        gd.selectVoters(myApp.subject+"_voters");
-        gd.selectCandidates(myApp.subject+"_candidates");
-
-    }
-
-    private void open_socket() throws IOException {
-        myApp.vb = new vote_block(myApp.merkle_tree, myApp.current_transactions, myApp.voters, myApp.nodes);
-        myApp.vc = new vote_chain(myApp.chain);
-        myApp.cs = new clientSocket(myApp.subject, myApp.udp_sock, myApp.id, myApp.users, myApp.chainlist, myApp.addrlist);
-        myApp.ss = new serverSocket(myApp.vb, myApp.vc, myApp.tcp_sock, myApp.udp_sock, myApp.chain, myApp.current_transactions, myApp.subject, myApp.users, myApp.cs);
-        Thread sth = new Thread(myApp.ss);
-        sth.start();
-    }
 
     private void createTable(String subject) {
         createchainTable(subject);
@@ -85,6 +73,7 @@ public class VoteParticipationActivity extends AppCompatActivity {
         createmerkle_treeTable(subject);
         createvotersTable(subject);
         createcandidatesTable(subject);
+        createusersTable(subject);
     }
 
     private void createchainTable(String subject) {
@@ -142,5 +131,19 @@ public class VoteParticipationActivity extends AppCompatActivity {
                 + " pk text not null, "
                 + " primary key(id));"
         );
+    }
+
+    private boolean getData() throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException {
+        GetDataBase gd = new GetDataBase(db);
+        ArrayList<Object> arr = gd.selectChain(myApp.subject + "_chain");
+        if(arr.size() == 0) {
+            return true;
+        }
+        gd.selectCandidates(myApp.subject + "_candidates");
+        gd.selectUserInfo();
+        gd.selectUsers(myApp.subject + "_users");
+        gd.selectVoters(myApp.subject + "_voters");
+
+        return false;
     }
 }

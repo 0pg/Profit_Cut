@@ -35,7 +35,8 @@ public class serverSocket implements Runnable{
     private ArrayList<block> blocks;
     private ArrayList<Object> chains;
     private String subject;
-    private HashMap<String, HashMap> attendances;
+    private HashMap<String, PublicKey> attendances;
+    private HashMap<String, Integer> nodes;
     private clientSocket cs;
 
     public ArrayList<HashMap> getTransacs() {
@@ -50,11 +51,11 @@ public class serverSocket implements Runnable{
         return chains;
     }
 
-    public HashMap<String, HashMap> getAttendances() {
+    public HashMap<String, PublicKey> getAttendances() {
         return attendances;
     }
 
-    public serverSocket(vote_block vb, vote_chain vc, ServerSocket tcp_sock, DatagramSocket udp_sock, ArrayList<Object> chains, ArrayList<HashMap> transacs, String subject, HashMap attendances, clientSocket cs) throws IOException {
+    public serverSocket(vote_block vb, vote_chain vc, ServerSocket tcp_sock, DatagramSocket udp_sock, ArrayList<Object> chains, ArrayList<HashMap> transacs, String subject, HashMap attendances, HashMap nodes, clientSocket cs) throws IOException {
         super();
         this.vb = vb;
         this.vc = vc;
@@ -65,6 +66,7 @@ public class serverSocket implements Runnable{
         this.blocks = new ArrayList<block>();
         this.chains = chains;
         this.attendances = attendances;
+        this.nodes = nodes;
         this.cs = cs;
     }
 
@@ -83,51 +85,59 @@ public class serverSocket implements Runnable{
         int port = packet.getPort();
         packet = new DatagramPacket(buf, buf.length, address, port);
 
-        if(data.containsKey("Profit_Cut?")){
+        if(data.containsKey("Profit_Cut_info"+this.subject)){
             buf = "Profit_OK".getBytes();
             packet = new DatagramPacket(buf, buf.length, address, 12222);
             this.udp_sock.send(packet);
             ThreadHandler3 th3 = new ThreadHandler3();
             th3.start();
         }
-        else if(data.containsKey("Profit_Cut?"+subject)) {
+        else if(data.containsKey("Profit_Cut?"+this.subject)) {
             buf = "Profit_OK".getBytes();
             packet = new DatagramPacket(buf, buf.length, address, 12222);
             this.udp_sock.send(packet);
             ThreadHandler2 th2 = new ThreadHandler2();
             th2.start();
         }
-        else if(data.containsKey("Profit_Cut_transac"+subject)) {
+        else if(data.containsKey("Profit_Cut_transac"+this.subject)) {
             HashMap transac = (HashMap)data.get("Profit_Cut_transac"+subject);
             getRsa rsa = new getRsa();
             String sender = (String) data.get("sender");
             String encrypt_num = (String) data.get("encrypted");
-            PublicKey key = (PublicKey) this.attendances.get(sender).get("Key");
+            PublicKey key = this.attendances.get(sender);
             if(!rsa.decryption(encrypt_num, key).equals("false") && vb.add_transaction(transac)) {
-                this.transacs.add(transac);
                 byte[] pack = message_serialize2(data);
                 cs.broadcast(pack);
             }
         }
-        else if(data.containsKey("Profit_Cut_block"+subject)) {
-            block b = (block) data.get("Profit_Cut_block"+subject);
+        else if(data.containsKey("Profit_Cut_block"+this.subject)) {
+            block b = (block) data.get("Profit_Cut_block"+this.subject);
             if(vb.valid_block(b, this.chains)) {
                 vc.add_block(b);
+                charge(b);
                 byte[] pack = message_serialize2(data);
                 cs.broadcast(pack);
             }
         }
+        else if(data.containsKey("Profit_Cut_userinfo"+this.subject)) {
+            HashMap<String, PublicKey> users = (HashMap)data.get("Profit_Cut_userinfo"+this.subject);
+            String encrypted = (String)data.get("encrypted");
+            getRsa rsa = new getRsa();
+            PublicKey key = (this.attendances.get("Key"));
+            String user = rsa.decryption(encrypted, key);
+            if(!user.equals("false")) {
+                this.attendances.putAll(users);
+            }
+        }
+
         else if(data.containsKey("Profit_Cut_newbie")) {
             String account = (String)data.get("Profit_Cut_newbie");
             String encrypted = (String)data.get("encrypted");
             getRsa rsa = new getRsa();
             PublicKey key = (PublicKey)(rsa.decode_publickey((String)(data.get("Key"))));
             String user = rsa.decryption(encrypted, key);
-            HashMap<String, Object> info = new HashMap<>();
-            info.put("Key", key);
-            info.put("token", 1);
             if(!user.equals("false") && !this.attendances.containsKey(user)) {
-                this.attendances.put(account, info);
+                this.attendances.put(account, key);
             }
         }
     }
@@ -149,6 +159,14 @@ public class serverSocket implements Runnable{
             ThreadHandler handler = new ThreadHandler(socket, att);
             handler.start();
             handler.join();
+        }
+    }
+
+    private void charge(block b) {
+        for(HashMap<String, String> map : b.getTransaction_pool()) {
+            String voter = map.get("voter");
+            int token = this.nodes.get("token");
+            this.nodes.put(voter, token - 1);
         }
     }
 

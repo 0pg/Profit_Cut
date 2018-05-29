@@ -11,6 +11,7 @@ public class dbHelper extends SQLiteOpenHelper {
         super(context, "profitcut", null, 1);
     }
 
+
     @Override
     public void onCreate(SQLiteDatabase db) {
 

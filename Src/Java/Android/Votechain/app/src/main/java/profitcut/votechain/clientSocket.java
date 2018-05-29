@@ -29,7 +29,7 @@ public class clientSocket {
     private String user;
     private int udp_port;
     private int tcp_port;
-    private HashMap<String, HashMap> users;
+    private HashMap<String, PublicKey> users;
     private ArrayList<InetAddress> addrlist;
     private ArrayList<ArrayList> chainlist;
 
@@ -51,34 +51,11 @@ public class clientSocket {
         this.addrlist = addrlist;
     }
 
-
-    public void handle_init() {
-        ThreadHandler th = new ThreadHandler();
-        th.start();
-    }
-
     public void handle_verify() {
         ThreadHandler2 th2 = new ThreadHandler2();
         th2.start();
     }
 
-    private void broadcast_init() {
-        try {
-            HashMap<String, Integer> msg = new HashMap<>();
-            msg.put("Profit_Cut?", 1);
-            byte[] serializedMessage = message_serialize(msg);
-            byte[] buf = new byte[2048];
-            DatagramPacket packet = new DatagramPacket(buf, buf.length);
-            broadcast(serializedMessage);
-            this.udp_sock.receive(packet);
-            String pack = new String(packet.getData(), 0, packet.getLength());
-            if(pack.contains("Profit_OK")) {
-                tcp_recv_users(packet.getAddress());
-            }
-        } catch (Exception ignored) {
-
-        }
-    }
 
     private void broadcast_verify() {
         try {
@@ -112,6 +89,15 @@ public class clientSocket {
     public void broadcast_block(block b, PrivateKey pk) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
         HashMap<String, Object> data = new HashMap<>();
         data.put("Profit_Cut_block"+this.subject, b);
+        data.put("sender", this.user);
+        data.put("encrypted", encrypt(pk));
+        byte[] serializedMessage = message_serialize(data);
+        broadcast(serializedMessage);
+    }
+
+    public void broadcast_users(PrivateKey pk) throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
+        HashMap<String, Object> data = new HashMap<>();
+        data.put("Profit_Cut_userinfo"+this.subject, this.users);
         data.put("sender", this.user);
         data.put("encrypted", encrypt(pk));
         byte[] serializedMessage = message_serialize(data);
@@ -168,11 +154,7 @@ public class clientSocket {
         oo.close();
         return serializedMessage;
     }
-    class ThreadHandler extends Thread{
-        public void run() {
-            broadcast_init();
-        }
-    }
+
     class ThreadHandler2 extends Thread{
         public void run() {
             broadcast_verify();

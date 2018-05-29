@@ -17,12 +17,11 @@ import java.util.HashMap;
 import javax.crypto.NoSuchPaddingException;
 
 public class GetDataBase extends AppCompatActivity {
-    SQLiteDatabase db;
-    SQLiteOpenHelper dh;
     MyApplication myApp = (MyApplication)getApplication();
-
-    public GetDataBase() {
+    SQLiteDatabase db;
+    public GetDataBase(SQLiteDatabase db) {
         super();
+        this.db = db;
     }
 
     public HashMap<String, Integer> selectUserInfo() {
@@ -48,13 +47,16 @@ public class GetDataBase extends AppCompatActivity {
         return map;
     }
 
-    public void selectChain(String name) {
-        String[] columns = {"idx", "deadline", "subject", "constructor", "ver", "time", "proof", "precious_hash", "merkle_root", "block_hash"};
+    public ArrayList selectChain(String name) {
+        String[] columns = {"idx", "deadline", "subject", "constructor", "ver", "time", "proof", "previous_hash", "merkle_root", "block_hash"};
         ArrayList<Object> array = new ArrayList<>();
-        Cursor c1 = db.query(name+"_chain", columns, null, null, null, null, null);
+        Cursor c1 = db.query(name, columns, null, null, null, null, null);
 
         int recordCount = c1.getCount();
         c1.moveToNext();
+        if(c1.getCount() == 0){
+            return array;
+        }
         array.add(new genesisblock(c1.getString(c1.getColumnIndex("block_hash")), c1.getString(c1.getColumnIndex("subject")),
                 selectCandidates(name), new genesisblock_header(c1.getString(c1.getColumnIndex("ver")), c1.getInt(c1.getColumnIndex("idx")),
                 c1.getFloat(c1.getColumnIndex("time")), c1.getFloat(c1.getColumnIndex("deadline")))));
@@ -71,7 +73,9 @@ public class GetDataBase extends AppCompatActivity {
         }
 
         myApp.chain = array;
+        return array;
     }
+
 
     public ArrayList selectTransactionPool(String name, int idx) {
         String[] columns = {"idx", "voter", "candidate"};

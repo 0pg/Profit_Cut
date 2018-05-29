@@ -4,6 +4,7 @@
 
     <!-- Phone Number 얻기 권한 설정 -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:name=".MyApplication"

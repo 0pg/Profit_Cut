@@ -7,6 +7,9 @@ import android.view.View;
 import android.widget.Toast;
 
 import java.io.IOException;
+import java.net.DatagramSocket;
+import java.net.ServerSocket;
+import java.net.SocketException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -25,13 +28,30 @@ public class MenuActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menu);
-        exeServer();
+        get_features();
         try {
+            open_socket();
             createBlock();
+        } catch (IOException e) {
+            Toast.makeText(getApplicationContext(), "openSocket error", Toast.LENGTH_LONG).show();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Toast.makeText(getApplicationContext(), "createblock error", Toast.LENGTH_LONG).show();
         }
     }
+
+    private void get_features() {
+        myApp.vb = new vote_block(myApp.merkle_tree, myApp.current_transactions, myApp.voters, myApp.nodes);
+        myApp.vc = new vote_chain(myApp.chain);
+    }
+
+    private void open_socket() throws IOException {
+        myApp.cs = new clientSocket(myApp.subject, myApp.udp_sock, myApp.id, myApp.users, myApp.chainlist, myApp.addrlist);
+        myApp.ss = new serverSocket(myApp.vb, myApp.vc, myApp.tcp_sock, myApp.udp_sock, myApp.chain, myApp.current_transactions, myApp.subject, myApp.users, myApp.nodes, myApp.cs);
+        Thread sth = new Thread(myApp.ss);
+        sth.start();
+        exeServer();
+    }
+
 
     public void onButtonVote(View view) {
         Intent VoteIntent = new Intent(MenuActivity.this, VoteActivity.class);
@@ -50,6 +70,7 @@ public class MenuActivity extends AppCompatActivity {
 
     public void onButtonParticipation(View view) {
         Intent ParticipationIntent = new Intent(MenuActivity.this, VoteParticipationActivity.class);
+        myApp.init();
         startActivity(ParticipationIntent);
     }
 
@@ -68,12 +89,7 @@ public class MenuActivity extends AppCompatActivity {
             myApp.b = new block(myApp.current_transactions, myApp.merkle_tree, myApp.bh);
             startHashing();
         }
-        else {
-            int index = 1;
-            myApp.gh = new genesisblock_header(myApp.ver, index, Calendar.getInstance().getTimeInMillis() / 1000, myApp.deadline);
-            myApp.gb = new genesisblock(myApp.vb.hash(myApp.gh.toString()), myApp.subject, myApp.constructor, myApp.candidates ,myApp.gh);
-            myApp.chain.add(myApp.gb);
-        }
+
     }
 
     private void startHashing() throws InterruptedException {
@@ -83,11 +99,10 @@ public class MenuActivity extends AppCompatActivity {
         th2.start();
         th.join();
         th2.join();
-
+        startHashing();
     }
 
     public void exeServer() {
-        myApp.cs.handle_init();
         myApp.cs.handle_verify();
     }
 
@@ -103,6 +118,7 @@ public class MenuActivity extends AppCompatActivity {
                 try {
                     myApp.b = new block(myApp.current_transactions, myApp.merkle_tree, myApp.bh);
                 } catch (NullPointerException e) {
+                    Toast.makeText(getApplicationContext(), myApp.b.toString(), Toast.LENGTH_LONG).show();
                     break;
                 }
             } while (!myApp.vb.valid_proof(myApp.bh));
