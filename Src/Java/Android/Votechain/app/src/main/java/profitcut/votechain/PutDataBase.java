@@ -5,9 +5,12 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
+
+import java.util.ArrayList;
 
 public class PutDataBase extends AppCompatActivity {
     SQLiteDatabase db;
@@ -18,13 +21,18 @@ public class PutDataBase extends AppCompatActivity {
         this.db = this.dh.getWritableDatabase();
     }
 
+    public void initTable(String name) {
+        db.execSQL("delete from "+name+";");
+    }
+
     public void insertUsers( String id, int token) {
-        ContentValues recordValues = new ContentValues();
-
-        recordValues.put("id", id);
-        recordValues.put("token", token);
-
-        db.insert("users", null, recordValues);
+        String sql = "Insert into user_info values ('" +
+                id + "', " +
+                token +");";
+        try {
+            db.execSQL(sql);
+        } catch (SQLiteException e) {
+        }
     }
 
     public void insertUserInfo( String id, String puk, String name) {
@@ -33,70 +41,76 @@ public class PutDataBase extends AppCompatActivity {
             String sql = "insert into " + name + " values('" + id + "', '" + puk + "');";
             db.execSQL(sql);
         } catch (SQLiteConstraintException e) {
-
         }
     }
 
-    public void insertChain(String name, int idx, float deadline, String subject, String constructor, String ver, float time, int proof, String previous_hash, String merkle_root, String block_hash) {
+    public void insertChain(int idx, float deadline, String subject, String constructor, String ver, float time, int proof, String previous_hash, String merkle_root, String block_hash) {
         ContentValues recordValues = new ContentValues();
+        String name = subject+"_chain";
+        String sql = "Insert into "+name+" values (" +
+                idx + ", "+
+                deadline + ", '"+
+                subject + "', '"+
+                constructor + "', '"+
+                ver + "', "+
+                time + ", "+
+                proof + ", '"+
+                previous_hash + "', '"+
+                merkle_root + "', '"+
+                block_hash + "');";
+        try {
+            db.execSQL(sql);
+        } catch (SQLiteException e){
+        }
+        }
 
-        recordValues.put("idx", idx);
-        recordValues.put("deadline", deadline);
-        recordValues.put("subject", subject);
-        recordValues.put("constructor", constructor);
-        recordValues.put("ver", ver);
-        recordValues.put("time", time);
-        recordValues.put("proof", proof);
-        recordValues.put("previous_hash", previous_hash);
-        recordValues.put("merkle_root", merkle_root);
-        recordValues.put("block_hash", block_hash);
-
-        db.insert(name, null, recordValues);
-    }
 
     public void insertTransactionPool(String name, int idx, String voter, String candidate) {
-        ContentValues recordValues = new ContentValues();
-
-        recordValues.put("idx", idx);
-        recordValues.put("voter", voter);
-        recordValues.put("candidate", candidate);
-
-        db.insert(name, null, recordValues);
-    }
+        String sql = "Insert into "+name+" values (" +
+                idx + ", '" +
+                voter + "', '" +
+                candidate + "');";
+        try {
+            db.execSQL(sql);
+        } catch (SQLiteException e){
+        }    }
 
     public void insertMerkleTree(String name, int idx, int node_idx, String transaction_hash) {
-        ContentValues recordValues = new ContentValues();
-
-        recordValues.put("idx", idx);
-        recordValues.put("node_idx", node_idx);
-        recordValues.put("transaction_hash", transaction_hash);
-
-        db.insert(name, null, recordValues);
+        String sql = "Insert into "+name+" values (" +
+                idx + ", " +
+                node_idx + ", '" +
+                transaction_hash +"');";
+        try {
+            db.execSQL(sql);
+        } catch (SQLiteException e){
+        }
     }
 
     public void insertVoters(String name, String account) {
-        ContentValues recordValues = new ContentValues();
+        String sql = "Insert into "+name+" values ('" +
+                account+"');";
+        try {
+            db.execSQL(sql);
+        } catch (SQLiteException e){
+        }    }
 
-        recordValues.put("account", account);
 
-        db.insert(name, null, recordValues);
-    }
 
     public void insertCandidates(String name, String candidate) {
-        ContentValues recordValues = new ContentValues();
-
-        recordValues.put("candidate", candidate);
-
-        db.insert(name, null, recordValues);
-    }
+        String sql = "Insert into "+name+" values ('" +
+                candidate + "');";
+        try {
+            db.execSQL(sql);
+        } catch (SQLiteException e){
+        }    }
 
     public void insertIdentifier( String id, String prk) {
         ContentValues recoValues = new ContentValues();
-
         String sql = "insert into identifier values('" + id +"', '" + prk +"');";
-        System.out.println(sql);
-        db.execSQL(sql);
-    }
+        try {
+            db.execSQL(sql);
+        } catch (SQLiteException e){
+        }    }
 
     /**
      * @title : public void updateUserInfo(String name, String id, int token)

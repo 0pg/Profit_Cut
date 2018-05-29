@@ -33,16 +33,19 @@ public class VoteParticipationActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         db = dh.getWritableDatabase();
+        myApp.init();
         setContentView(R.layout.activity_vote_participation);
         vote_name_Text = (EditText) findViewById(R.id.vote_name_Text);
+
     }
 
     public void onButtonMenu(View view) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException {
-        String vote_name = vote_name_Text.getText().toString();
-        myApp.subject = vote_name;
+        myApp.subject = vote_name_Text.getText().toString();
+//        myApp.constructor = "admin";
         createTable(myApp.subject);
-        new PutDataBase(dh).insertUserInfo(myApp.id, myApp.puk, myApp.subject+"_user_info");
-        if(!getData()){
+        if(((myApp.id != null) && (myApp.puk != null)))
+            new PutDataBase(dh).insertUserInfo(myApp.id, myApp.puk, myApp.subject+"_user_info");
+        if(getData()){
             createGenesis();
         }
         Intent MenuIntent = new Intent(VoteParticipationActivity.this, MenuActivity.class);
@@ -51,21 +54,9 @@ public class VoteParticipationActivity extends AppCompatActivity {
     private void createGenesis() {
         int index = 1;
         myApp.gh = new genesisblock_header(myApp.ver, index, Calendar.getInstance().getTimeInMillis() / 1000, myApp.deadline);
-        myApp.gb = new genesisblock(myApp.vb.hash(myApp.gh.toString()), myApp.subject, myApp.constructor, myApp.candidates ,myApp.gh);
+        myApp.gb = new genesisblock(myApp.vb.hash(myApp.gh.toString()), myApp.subject, myApp.constructor, myApp.candidates, myApp.gh);
         myApp.chain.add(0, myApp.gb);
     }
-    private void openDatabase() {
-        String name = "profitcut";
-
-        try {
-            db = openOrCreateDatabase(
-                    name,
-                    Activity.MODE_PRIVATE,
-                    null);
-        } catch (Exception ex) {
-        }
-    }
-
 
     private void createTable(String subject) {
         createchainTable(subject);
@@ -141,7 +132,7 @@ public class VoteParticipationActivity extends AppCompatActivity {
         }
         gd.selectCandidates(myApp.subject + "_candidates");
         gd.selectUserInfo();
-        gd.selectUsers(myApp.subject + "_users");
+        gd.selectUsers(myApp.subject + "_user_info");
         gd.selectVoters(myApp.subject + "_voters");
 
         return false;

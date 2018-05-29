@@ -291,7 +291,7 @@ class vote_block {
     }
 
     public boolean check_voters(String voter) {
-        int token = (Integer)this.nodes.get(voter);
+        int token = 10;
         if(this.voters.contains(voter)) {
             return false;
         }
@@ -311,7 +311,8 @@ class vote_block {
 
     public boolean add_transaction(HashMap<String, String> transac) {
         String voter = transac.get("voter");
-        int token = this.nodes.get(voter);
+//        int token = this.nodes.get(voter);
+        int token = 10;
         if(check_voters(voter)) {
             this.current_transactions.add(transac);
             transaction_record();

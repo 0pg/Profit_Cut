@@ -58,7 +58,7 @@ public class GetDataBase extends AppCompatActivity {
             return array;
         }
         array.add(new genesisblock(c1.getString(c1.getColumnIndex("block_hash")), c1.getString(c1.getColumnIndex("subject")),
-                selectCandidates(name), new genesisblock_header(c1.getString(c1.getColumnIndex("ver")), c1.getInt(c1.getColumnIndex("idx")),
+                selectCandidates(myApp.subject+"_candidates"), new genesisblock_header(c1.getString(c1.getColumnIndex("ver")), c1.getInt(c1.getColumnIndex("idx")),
                 c1.getFloat(c1.getColumnIndex("time")), c1.getFloat(c1.getColumnIndex("deadline")))));
         while(c1.moveToNext()){
             array.add(new block(c1.getString(c1.getColumnIndex("block_hash")),

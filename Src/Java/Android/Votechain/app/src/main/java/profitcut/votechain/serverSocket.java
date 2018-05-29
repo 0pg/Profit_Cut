@@ -73,7 +73,6 @@ public class serverSocket implements Runnable{
     private void udp_server() throws IOException, ClassNotFoundException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeySpecException, InterruptedException {
         byte[] buf = new byte[2048];
         DatagramPacket packet = new DatagramPacket(buf, buf.length);
-        System.out.println(packet.getAddress());
         while(packet.getAddress()==null);
         this.udp_sock.receive(packet);
 

@@ -45,7 +45,6 @@ public class LoginActivity extends AppCompatActivity {
                 myApp.id = (c.getString(c.getColumnIndex("id")));
                 myApp.prk = (c.getString(c.getColumnIndex("prk")));
             }
-            Toast.makeText(getApplicationContext(),c.getColumnNames().toString(),Toast.LENGTH_LONG);
             Intent ParticipationIntent = new Intent(LoginActivity.this, VoteParticipationActivity.class);
             startActivity(ParticipationIntent);
         }
@@ -70,6 +69,7 @@ public class LoginActivity extends AppCompatActivity {
         String prk = rsa.encode_base64(Prk.getEncoded());
         try {
             new PutDataBase(dh).insertIdentifier(id, prk);
+            new PutDataBase(dh).insertUsers(id, 1);
         } catch (Exception e) {
         }
         myApp.id = id;

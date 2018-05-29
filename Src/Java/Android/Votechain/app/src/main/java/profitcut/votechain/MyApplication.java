@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 public class MyApplication extends Application {
-    final static String ver = new String("V1.0.0");
+    final static String ver = "V1.0.0";
     static float deadline = Calendar.getInstance().getTimeInMillis() / 1000 + 10000;
     static String constructor;
     static String id;
@@ -40,14 +40,13 @@ public class MyApplication extends Application {
     static genesisblock gb;
     static block_header bh;
     static block b;
+    static boolean flag = true;
 
     public static void init(){
          float deadline = Calendar.getInstance().getTimeInMillis() / 1000 + 10000;
          String constructor = null;
          String prk = new String();
          String subject = null;
-         ServerSocket tcp_sock = null;
-         DatagramSocket udp_sock;
          ArrayList<Object> chain = new ArrayList<>();
          ArrayList<HashMap> current_transactions = new ArrayList<>();
          ArrayList<String> voters = new ArrayList<>();
@@ -60,7 +59,6 @@ public class MyApplication extends Application {
          vote_block vb = null;
          vote_chain vc = null;
          serverSocket ss = null;
-         clientSocket cs = null;
          genesisblock_header gh = null;
          genesisblock gb = null;
          block_header bh = null;
