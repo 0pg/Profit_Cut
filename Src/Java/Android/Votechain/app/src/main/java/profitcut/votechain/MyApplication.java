@@ -43,26 +43,26 @@ public class MyApplication extends Application {
     static boolean flag = true;
 
     public static void init(){
-         float deadline = Calendar.getInstance().getTimeInMillis() / 1000 + 10000;
-         String constructor = null;
-         String prk = new String();
-         String subject = null;
-         ArrayList<Object> chain = new ArrayList<>();
-         ArrayList<HashMap> current_transactions = new ArrayList<>();
-         ArrayList<String> voters = new ArrayList<>();
-         ArrayList<String> candidates = new ArrayList<>();
-         ArrayList<ArrayList> chainlist = new ArrayList<>();
-         ArrayList<InetAddress> addrlist = new ArrayList<>();
-         LinkedHashMap<Integer, String> merkle_tree = new LinkedHashMap<>();
-         HashMap<String, PublicKey> users = new HashMap<>();
-         HashMap<String, Integer> nodes = new HashMap<>();
-         vote_block vb = null;
-         vote_chain vc = null;
-         serverSocket ss = null;
-         genesisblock_header gh = null;
-         genesisblock gb = null;
-         block_header bh = null;
-         block b = null;
+         deadline = Calendar.getInstance().getTimeInMillis() / 1000 + 100000000;
+         constructor = null;
+         prk = new String();
+         subject = null;
+          chain = new ArrayList<>();
+         current_transactions = new ArrayList<>();
+         voters = new ArrayList<>();
+         candidates = new ArrayList<>();
+         chainlist = new ArrayList<>();
+         addrlist = new ArrayList<>();
+         merkle_tree = new LinkedHashMap<>();
+         users = new HashMap<>();
+         nodes = new HashMap<>();
+         vb = null;
+         vc = null;
+         ss = null;
+         gh = null;
+         gb = null;
+         bh = null;
+         b = null;
     }
 
 }

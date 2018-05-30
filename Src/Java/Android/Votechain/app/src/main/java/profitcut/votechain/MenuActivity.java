@@ -27,6 +27,9 @@ public class MenuActivity extends AppCompatActivity {
     MyApplication myApp = (MyApplication) getApplication();
     SQLiteDatabase db;
     dbHelper dh = new dbHelper(this);
+    startMining sM = new startMining();
+    pow p = new pow();
+    valid v = new valid();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,14 +40,11 @@ public class MenuActivity extends AppCompatActivity {
         try {
             open_socket();
         } catch (IOException e) {
-            Toast.makeText(getApplicationContext(), "openSocket error", Toast.LENGTH_LONG).show();
         }
-        if(myApp.flag == true) {
+        if (myApp.flag == true) {
             myApp.flag = false;
-            startMining sM = new startMining();
             sM.start();
         }
-        Toast.makeText(getApplicationContext(), String.valueOf(myApp.chain.size()), Toast.LENGTH_LONG).show();
     }
 
     private void get_features() {
@@ -52,7 +52,7 @@ public class MenuActivity extends AppCompatActivity {
         myApp.vc = new vote_chain(myApp.chain);
     }
 
-    private void open_socket() throws IOException  {
+    private void open_socket() throws IOException {
         myApp.cs = new clientSocket(myApp.subject, myApp.udp_sock, myApp.id, myApp.users, myApp.chainlist, myApp.addrlist);
         myApp.ss = new serverSocket(myApp.vb, myApp.vc, myApp.tcp_sock, myApp.udp_sock, myApp.chain, myApp.current_transactions, myApp.subject, myApp.users, myApp.nodes, myApp.cs);
         Thread sth = new Thread(myApp.ss);
@@ -77,29 +77,34 @@ public class MenuActivity extends AppCompatActivity {
     }
 
     public void onButtonParticipation(View view) throws InterruptedException {
+        Toast.makeText(getApplicationContext(), "체인 정보 저장하는 중...", Toast.LENGTH_LONG).show();
+        myApp.flag = true;
+        v.join();
+        sM.join();
         PutDataBase pd = new PutDataBase(dh);
         db.beginTransaction();
-        for(Object b : myApp.chain) {
-            if(b instanceof genesisblock) {
-                pd.initTable(myApp.subject+"_chain");
-                pd.insertChain(((genesisblock) b).getGenesis_h().getIndex(), ((genesisblock) b).getGenesis_h().getDeadline(),
+        pd.initTable(myApp.subject + "_chain");
+        pd.initTable(myApp.subject + "_transaction_pool");
+        pd.initTable(myApp.subject + "_merkle_tree");
+        pd.initTable(myApp.subject+"_candidates");
+        pd.initTable(myApp.subject+"_voters");
+        for (Object b : myApp.chain) {
+            if (b instanceof genesisblock) {
+                pd.insertChain(myApp.subject + "_chain", ((genesisblock) b).getGenesis_h().getIndex(), ((genesisblock) b).getGenesis_h().getDeadline(),
                         ((genesisblock) b).getSubject(), ((genesisblock) b).getConstructor(), ((genesisblock) b).getGenesis_h().getVer(),
                         ((genesisblock) b).getGenesis_h().getTime(), 0, "-", "-", ((genesisblock) b).getBlock_hash());
-                for(String candidate : ((genesisblock) b).getCandidates()) {
-                    pd.insertCandidates(myApp.subject+"_candidates", candidate);
+                for (String candidate : ((genesisblock) b).getCandidates()) {
+                    pd.insertCandidates(myApp.subject + "_candidates", candidate);
                 }
-            }
-            else {
-                pd.initTable(myApp.subject+"_transaction_pool");
-                pd.initTable(myApp.subject+"_merkle_tree");
-                pd.insertChain(((block) b).getBlock_h().getIndex(), 0, "-", "-",
+            } else {
+                pd.insertChain(myApp.subject + "_chain", ((block) b).getBlock_h().getIndex(), 0, "-", "-",
                         ((block) b).getBlock_h().getVer(), ((block) b).getBlock_h().getTime(), ((block) b).getBlock_h().getProof(),
                         ((block) b).getBlock_h().getPrevious_hash(), ((block) b).getBlock_h().getMerkle_root(), ((block) b).getBlock_hash());
                 for (HashMap<String, String> map : ((block) b).getTransaction_pool()) {
-                    pd.insertTransactionPool(myApp.subject+"_transaction_pool", ((block) b).getBlock_h().getIndex(), map.get("voter"), map.get("candidate"));
-                    pd.insertVoters(myApp.subject+"_voters", map.get("voter"));
+                    pd.insertTransactionPool(myApp.subject + "_transaction_pool", ((block) b).getBlock_h().getIndex(), map.get("voter"), map.get("candidate"));
+                    pd.insertVoters(myApp.subject + "_voters", map.get("voter"));
                 }
-                for (int i = 0; i < ((block) b).getMerkle_tree().size(); i++) {
+                for (int i = 1; i <= ((block) b).getMerkle_tree().size(); i++) {
                     pd.insertMerkleTree(myApp.subject, ((block) b).getBlock_h().getIndex(), i, ((block) b).getMerkle_tree().get(i));
                 }
             }
@@ -107,34 +112,73 @@ public class MenuActivity extends AppCompatActivity {
         db.setTransactionSuccessful();
         db.endTransaction();
         myApp.init();
-        myApp.flag = true;
         Intent ParticipationIntent = new Intent(MenuActivity.this, VoteParticipationActivity.class);
         startActivity(ParticipationIntent);
     }
 
-    private void createBlock() throws InterruptedException {
+    private synchronized void createBlock() throws InterruptedException {
         myApp.vb.add_transaction(myApp.vb.new_transaction(myApp.id, "A"));
-        if (myApp.chain.get(myApp.chain.size()-1) instanceof block) {
-            int index = myApp.chain.size();
-            block b = (block) myApp.chain.get(index - 1);
-            myApp.bh = new block_header(myApp.ver, index + 1, b.getBlock_hash(), myApp.merkle_tree.get(1));
-            myApp.b = new block(myApp.current_transactions, myApp.merkle_tree, myApp.bh);
+        System.out.println(myApp.chain.size());
+        if (myApp.chain.get(myApp.chain.size() - 1) instanceof genesisblock) {
+            genesisblock gb = (genesisblock) myApp.chain.get(0);
+            myApp.bh = new block_header("V.1.0.0", myApp.chain.size() + 1,
+                    ((genesisblock) myApp.chain.get(myApp.chain.size() - 1)).getBlock_hash(),
+                    myApp.merkle_tree.get(1));
+        } else {
+            myApp.bh = new block_header("V.1.0.0", myApp.chain.size() + 1,
+                    ((block) myApp.chain.get(myApp.chain.size() - 1)).getBlock_hash(),
+                    myApp.merkle_tree.get(1));
         }
-        else  {
-            int index = 2;
-            genesisblock b = (genesisblock) myApp.chain.get(0);
-            myApp.bh = new block_header(myApp.ver, index, b.getBlock_hash(), myApp.merkle_tree.get(1));
-            myApp.b = new block(myApp.current_transactions, myApp.merkle_tree, myApp.bh);
-        }
-        mining mine = new mining();
-        mine.start();
+        p.start();
+        p.join();
+
+        myApp.b = new block(myApp.current_transactions, myApp.merkle_tree, myApp.bh);
+
+        v.start();
+
+        hashing();
     }
 
     public void exeServer() {
         myApp.cs.handle_verify();
     }
 
-    class mining extends Thread {
+    public void hashing() {
+        System.out.println(myApp.b.getBlock_hash());
+        System.out.println(myApp.vb.hash(myApp.b.getBlock_h().toString()));
+        if (myApp.vb.valid_block(myApp.b, myApp.chain)) {
+            System.out.println(myApp.b.getBlock_hash().equals(myApp.vb.hash(myApp.b.getBlock_h().toString())));
+            myApp.current_transactions = new ArrayList<>();
+            myApp.vc.add_block(myApp.b);
+            try {
+                getRsa rsa = new getRsa();
+                PrivateKey prk = (PrivateKey) rsa.decode_privateKey(myApp.prk);
+                new clientSocket(myApp.id, new DatagramSocket(12222)).broadcast_block(myApp.b, prk);
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            } catch (NoSuchPaddingException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (InvalidKeyException e) {
+                e.printStackTrace();
+            } catch (IllegalBlockSizeException e) {
+                e.printStackTrace();
+            } catch (BadPaddingException e) {
+                e.printStackTrace();
+            } catch (InvalidKeySpecException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    class pow extends  Thread {
+        public void run() {
+            myApp.vb.proof_of_work(myApp.bh);
+        }
+    }
+
+    class valid extends  Thread {
         public void run() {
             do {
                 try {
@@ -143,41 +187,22 @@ public class MenuActivity extends AppCompatActivity {
                     break;
                 }
             } while (!myApp.vb.valid_proof(myApp.bh));
-            if(myApp.vb.valid_block(myApp.b, myApp.chain)){
-                myApp.current_transactions = new ArrayList<>();
-                myApp.chain.add(myApp.b);
-                myApp.vc.add_block(myApp.b);
-                Toast.makeText(getApplicationContext(), String.valueOf(myApp.chain.size()), Toast.LENGTH_LONG).show();
-                try {
-                    getRsa rsa = new getRsa();
-                    PrivateKey prk = (PrivateKey) rsa.decode_privateKey(myApp.prk);
-                    myApp.cs.broadcast_block(myApp.b, prk);
-                } catch (NoSuchAlgorithmException e) {
-                    e.printStackTrace();
-                } catch (NoSuchPaddingException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (InvalidKeyException e) {
-                    e.printStackTrace();
-                } catch (IllegalBlockSizeException e) {
-                    e.printStackTrace();
-                } catch (BadPaddingException e) {
-                    e.printStackTrace();
-                } catch (InvalidKeySpecException e) {
-                    e.printStackTrace();
-                }
-            }
         }
     }
+
     class startMining extends Thread {
-        public void run() {
+        public synchronized void run() {
             try {
-   //             while(myApp.flag  == false) {
+                while (myApp.flag == false) {
                     createBlock();
-     //           }
+                }
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                myApp.flag = true;
+                try {
+                    join();
+                } catch (InterruptedException e1) {
+                    e1.printStackTrace();
+                }
             }
         }
     }

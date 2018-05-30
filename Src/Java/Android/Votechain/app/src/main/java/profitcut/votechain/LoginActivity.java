@@ -53,14 +53,11 @@ public class LoginActivity extends AppCompatActivity {
     public void onButtonAuthentication(View view) throws SocketException {
         TelephonyManager telManager = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
         String num = telManager.getLine1Number();
-        Toast.makeText(getApplicationContext(), num, Toast.LENGTH_LONG);
         getRsa rsa = null;
         try {
             rsa = new getRsa();
         } catch (NoSuchAlgorithmException e) {
-            Toast.makeText(getApplicationContext(), "failed2", Toast.LENGTH_LONG).show();
         } catch (NoSuchPaddingException e) {
-            Toast.makeText(getApplicationContext(), "failed3", Toast.LENGTH_LONG).show();
         }
         PublicKey Puk = (PublicKey) rsa.get_public();
         PrivateKey Prk = (PrivateKey) rsa.get_private();

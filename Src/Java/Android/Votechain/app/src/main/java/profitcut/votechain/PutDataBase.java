@@ -44,9 +44,8 @@ public class PutDataBase extends AppCompatActivity {
         }
     }
 
-    public void insertChain(int idx, float deadline, String subject, String constructor, String ver, float time, int proof, String previous_hash, String merkle_root, String block_hash) {
+    public void insertChain(String name, int idx, float deadline, String subject, String constructor, String ver, float time, int proof, String previous_hash, String merkle_root, String block_hash) {
         ContentValues recordValues = new ContentValues();
-        String name = subject+"_chain";
         String sql = "Insert into "+name+" values (" +
                 idx + ", "+
                 deadline + ", '"+
@@ -58,10 +57,8 @@ public class PutDataBase extends AppCompatActivity {
                 previous_hash + "', '"+
                 merkle_root + "', '"+
                 block_hash + "');";
-        try {
             db.execSQL(sql);
-        } catch (SQLiteException e){
-        }
+
         }
 
 
@@ -99,18 +96,16 @@ public class PutDataBase extends AppCompatActivity {
     public void insertCandidates(String name, String candidate) {
         String sql = "Insert into "+name+" values ('" +
                 candidate + "');";
-        try {
             db.execSQL(sql);
-        } catch (SQLiteException e){
-        }    }
+
+    }
 
     public void insertIdentifier( String id, String prk) {
         ContentValues recoValues = new ContentValues();
         String sql = "insert into identifier values('" + id +"', '" + prk +"');";
-        try {
             db.execSQL(sql);
-        } catch (SQLiteException e){
-        }    }
+
+    }
 
     /**
      * @title : public void updateUserInfo(String name, String id, int token)

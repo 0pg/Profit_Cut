@@ -62,7 +62,8 @@ public class GetDataBase extends AppCompatActivity {
                 c1.getFloat(c1.getColumnIndex("time")), c1.getFloat(c1.getColumnIndex("deadline")))));
         while(c1.moveToNext()){
             array.add(new block(c1.getString(c1.getColumnIndex("block_hash")),
-                    selectTransactionPool(name, c1.getInt(c1.getColumnIndex("idx"))), selectMerkle(name, c1.getInt(c1.getColumnIndex("idx")))
+                    selectTransactionPool(myApp.subject, c1.getInt(c1.getColumnIndex("idx"))),
+                    selectMerkle(myApp.subject, c1.getInt(c1.getColumnIndex("idx")))
                     , new block_header(c1.getString(c1.getColumnIndex("ver"))
                     , c1.getInt(c1.getColumnIndex("idx"))
                     , c1.getInt(c1.getColumnIndex("proof"))
@@ -105,7 +106,7 @@ public class GetDataBase extends AppCompatActivity {
     public HashMap selectMerkle(String name, int idx) {
         String[] colums = {"idx", "node_idx", "transaction_hash"};
         HashMap<Integer, String> map = new HashMap<>();
-        Cursor c1 = db.rawQuery("select node_idx, transaction_hash from "+name+" where idx="+idx, null);
+        Cursor c1 = db.rawQuery("select node_idx transaction_hash from "+name+"_merkle_tree where idx="+idx, null);
         while(c1.moveToNext()){
             map.put(c1.getInt(0), c1.getString(1));
         }

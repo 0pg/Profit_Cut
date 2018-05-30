@@ -33,7 +33,6 @@ public class VoteParticipationActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         db = dh.getWritableDatabase();
-        myApp.init();
         setContentView(R.layout.activity_vote_participation);
         vote_name_Text = (EditText) findViewById(R.id.vote_name_Text);
 
@@ -59,6 +58,7 @@ public class VoteParticipationActivity extends AppCompatActivity {
 
     private void createGenesis() {
         int index = 1;
+        myApp.candidates.add("A");
         myApp.gh = new genesisblock_header(myApp.ver, index, Calendar.getInstance().getTimeInMillis() / 1000, myApp.deadline);
         myApp.gb = new genesisblock(myApp.vb.hash(myApp.gh.toString()), myApp.subject, myApp.constructor, myApp.candidates, myApp.gh);
         myApp.chain.add(0, myApp.gb);
@@ -77,14 +77,14 @@ public class VoteParticipationActivity extends AppCompatActivity {
         String name = subject + "_chain";
         db.execSQL("create table if not exists " + name + "("
                 + " idx integer not null, "
-                + " deadline real not null default '0', "
-                + " subject text not null default '-', "
-                + " constructor text not null default '-', "
+                + " deadline real not null, "
+                + " subject text not null, "
+                + " constructor text not null, "
                 + " ver text not null, "
                 + " time real not null, "
-                + " proof integer not null default '0', "
-                + " previous_hash text not null default '-', "
-                + " merkle_root text not null default '-', "
+                + " proof integer not null, "
+                + " previous_hash text not null, "
+                + " merkle_root text not null, "
                 + " block_hash text not null, "
                 + " primary key(idx));");
     }
@@ -136,10 +136,10 @@ public class VoteParticipationActivity extends AppCompatActivity {
         if(arr.size() == 0) {
             return true;
         }
-        gd.selectCandidates(myApp.subject + "_candidates");
         gd.selectUserInfo();
         gd.selectUsers(myApp.subject + "_user_info");
         gd.selectVoters(myApp.subject + "_voters");
+        gd.selectCandidates(myApp.subject + "_candidates");
 
         return false;
     }

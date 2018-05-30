@@ -30,7 +30,6 @@ public class VoteActivity extends AppCompatActivity {
                     if (kimBox.isChecked()) {
                         kimBox.setChecked(false);
                     }
-                    Toast.makeText(getApplicationContext(), "임현 선택됨", Toast.LENGTH_LONG).show();
                 } else {
 
                 }
@@ -44,7 +43,6 @@ public class VoteActivity extends AppCompatActivity {
                     if (limBox.isChecked()) {
                         limBox.setChecked(false);
                     }
-                    Toast.makeText(getApplicationContext(), "자훈 선택됨", Toast.LENGTH_LONG).show();
                 } else {
 
                 }
