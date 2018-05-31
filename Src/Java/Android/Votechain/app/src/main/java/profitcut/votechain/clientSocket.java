@@ -61,8 +61,7 @@ public class clientSocket {
     private void broadcast_verify() {
         try {
             HashMap<String, Object> data = new HashMap<>();
- //           data.put("Profit_Cut?"+this.subject, "Profit_Cut");
-            data.put("Profit_Cut_info", "Profit_Cut");
+            data.put("Profit_Cut?"+this.subject, "Profit_Cut");
             byte[] serializedMessage = message_serialize(data);
             byte[] buf = new byte[512];
             DatagramPacket packet = new DatagramPacket(buf, buf.length);
