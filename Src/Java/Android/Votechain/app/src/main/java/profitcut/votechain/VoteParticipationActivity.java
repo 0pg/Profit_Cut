@@ -155,4 +155,9 @@ public class VoteParticipationActivity extends AppCompatActivity {
 
         return false;
     }
+
+    // 뒤로가기 버튼 막기
+    @Override
+    public void onBackPressed() {
+    }
 }

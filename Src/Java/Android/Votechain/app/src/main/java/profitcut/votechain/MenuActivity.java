@@ -224,4 +224,9 @@ public class MenuActivity extends AppCompatActivity {
             MenuActivity.runningThread --;
         }
     }
+
+    // 뒤로가기 버튼 막기
+    @Override
+    public void onBackPressed() {
+    }
 }
