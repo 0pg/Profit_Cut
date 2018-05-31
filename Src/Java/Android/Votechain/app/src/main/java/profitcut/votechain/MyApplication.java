@@ -45,9 +45,8 @@ public class MyApplication extends Application {
     public static void init(){
          deadline = 0;
          constructor = null;
-         prk = new String();
          subject = null;
-          chain = new ArrayList<>();
+         chain = new ArrayList<>();
          current_transactions = new ArrayList<>();
          voters = new ArrayList<>();
          candidates = new ArrayList<>();

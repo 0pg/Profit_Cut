@@ -33,7 +33,6 @@ public class MenuActivity extends AppCompatActivity {
     dbHelper dh = new dbHelper(this);
     static int runningThread = 0;
     startMining sM = new startMining();
-    pow p = new pow();
  //   valid v = new valid();
 
     @Override
@@ -90,6 +89,7 @@ public class MenuActivity extends AppCompatActivity {
       //  sM.join();
         Toast.makeText(getApplicationContext(), "체인 정보 저장하는 중...", Toast.LENGTH_LONG).show();
         PutDataBase pd = new PutDataBase(dh);
+        System.out.println(subject);
         db.beginTransaction();
         pd.initTable(subject + "_chain");
         pd.initTable(subject + "_transaction_pool");
@@ -124,7 +124,6 @@ public class MenuActivity extends AppCompatActivity {
         db.setTransactionSuccessful();
         db.endTransaction();
         Thread.sleep(1500);
-        myApp.init();
         Intent ParticipationIntent = new Intent(MenuActivity.this, VoteParticipationActivity.class);
         startActivity(ParticipationIntent);
     }
@@ -144,7 +143,9 @@ public class MenuActivity extends AppCompatActivity {
                     ((block) myApp.chain.get(myApp.chain.size() - 1)).getBlock_hash(),
                     myApp.merkle_tree.get(1));
         }
+        pow p = new pow();
         p.start();
+        p.join();
         System.out.println("pstart");
         hashing(myApp.bh);
     }

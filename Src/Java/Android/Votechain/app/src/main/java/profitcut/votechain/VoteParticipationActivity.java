@@ -38,6 +38,7 @@ public class VoteParticipationActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        myApp.init();
         db = dh.getWritableDatabase();
         setContentView(R.layout.activity_vote_participation);
         vote_name_Text = (EditText) findViewById(R.id.vote_name_Text);
