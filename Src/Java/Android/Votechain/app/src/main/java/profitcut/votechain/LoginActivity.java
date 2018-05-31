@@ -67,6 +67,8 @@ public class LoginActivity extends AppCompatActivity {
             }
             try {
                 myApp.udp_sock = new DatagramSocket(12222);
+                myApp.cs = new clientSocket(myApp.id, myApp.udp_sock);
+                myApp.cs.handle_verify();
             } catch (SocketException e) {
                 e.printStackTrace();
             }
