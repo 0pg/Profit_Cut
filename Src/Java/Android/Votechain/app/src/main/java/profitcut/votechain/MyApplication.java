@@ -15,7 +15,7 @@ import java.util.LinkedHashMap;
 
 public class MyApplication extends Application {
     final static String ver = "V1.0.0";
-    static float deadline = Calendar.getInstance().getTimeInMillis() / 1000 + 10000;
+    static float deadline;
     static String constructor;
     static String id;
     static String prk;
@@ -43,7 +43,7 @@ public class MyApplication extends Application {
     static boolean flag = true;
 
     public static void init(){
-         deadline = Calendar.getInstance().getTimeInMillis() / 1000 + 100000000;
+         deadline = 0;
          constructor = null;
          prk = new String();
          subject = null;

@@ -264,10 +264,14 @@ class vote_chain {
 }
 
 class vote_block {
-    LinkedHashMap<Integer, String> merkle_tree;
-    ArrayList<HashMap> current_transactions;
-    ArrayList<String> voters;
-    HashMap<String, Integer> nodes;
+    private LinkedHashMap<Integer, String> merkle_tree;
+    private ArrayList<HashMap> current_transactions;
+    private ArrayList<String> voters;
+    private HashMap<String, Integer> nodes;
+
+    public LinkedHashMap<Integer, String> getMerkle_tree() {
+        return merkle_tree;
+    }
 
     public vote_block(LinkedHashMap<Integer, String> merkle_tree, ArrayList<HashMap> current_transactions,
                       ArrayList<String> voters, HashMap<String, Integer> nodes) {
@@ -311,13 +315,16 @@ class vote_block {
 
     public boolean add_transaction(HashMap<String, String> transac) {
         String voter = transac.get("voter");
-//        int token = this.nodes.get(voter);
-        int token = 10;
+        try {
+            int token = this.nodes.get(voter);
+        } catch(NullPointerException e) {
+
+        }
         if(check_voters(voter)) {
             this.current_transactions.add(transac);
             transaction_record();
             update_voters(transac.get("voter"));
-            this.nodes.put(voter, token -1 );
+            this.nodes.put(voter, 1);
             return true;
         }
         return false;
@@ -355,12 +362,16 @@ class vote_block {
     }
 
     public static boolean valid_proof(block_header block_h) {
-            String guess_hash = hash(block_h.toString());
-            if(guess_hash.substring(0, 4).equals("0000")) return true;
-            else return false;
+            try {
+                String guess_hash = hash(block_h.toString());
+                if (guess_hash.substring(0, 4).equals("0000")) return true;
+                else return false;
+            } catch (NullPointerException e) {
+                return false;
+            }
     }
 
-    public float deadline(int year, int month, int day, int hour) {
+    public static float deadline(int year, int month, int day, int hour) {
         Calendar c = Calendar.getInstance();
         if(year < c.get(Calendar.YEAR)) return 0;
         if(month > 12 || month < 1) return 0;

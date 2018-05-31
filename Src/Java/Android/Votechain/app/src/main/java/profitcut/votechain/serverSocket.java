@@ -84,7 +84,7 @@ public class serverSocket implements Runnable{
         int port = packet.getPort();
         packet = new DatagramPacket(buf, buf.length, address, port);
 
-        if(data.containsKey("Profit_Cut_info"+this.subject)){
+        if(data.containsKey("Profit_Cut_info")){
             buf = "Profit_OK".getBytes();
             packet = new DatagramPacket(buf, buf.length, address, 12222);
             this.udp_sock.send(packet);
@@ -135,8 +135,8 @@ public class serverSocket implements Runnable{
             getRsa rsa = new getRsa();
             PublicKey key = (PublicKey)(rsa.decode_publickey((String)(data.get("Key"))));
             String user = rsa.decryption(encrypted, key);
-            if(!user.equals("false") && !this.attendances.containsKey(user)) {
-                this.attendances.put(account, key);
+            if(!user.equals("false") && !this.nodes.containsKey(user)) {
+                this.nodes.put(account, 1);
             }
         }
     }
@@ -151,9 +151,9 @@ public class serverSocket implements Runnable{
         }
     }
 
-    private void tcp_send_attendance() throws IOException, InterruptedException {
+    private void tcp_send_nodes() throws IOException, InterruptedException {
         while(true) {
-            byte[] att = message_serialize2(this.attendances);
+            byte[] att = message_serialize2(this.nodes);
             Socket socket = this.tcp_sock.accept();
             ThreadHandler handler = new ThreadHandler(socket, att);
             handler.start();
@@ -241,7 +241,7 @@ public class serverSocket implements Runnable{
     class ThreadHandler3 extends Thread{
         public void run() {
             try {
-                tcp_send_attendance();
+                tcp_send_nodes();
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (InterruptedException e) {

@@ -18,11 +18,13 @@ import java.net.ServerSocket;
 import java.net.SocketException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.Permission;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.concurrent.Executors;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -32,27 +34,48 @@ public class LoginActivity extends AppCompatActivity {
     SQLiteDatabase db;
     dbHelper dh = new dbHelper(this);
     MyApplication myApp = (MyApplication)getApplication();
+    String num;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
+        TelephonyManager telManager = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
+        try {
+            this.num = telManager.getLine1Number();
+        } catch (Exception e) {
+            Toast.makeText(getApplicationContext(), "어플 설정에서 전화번호 권한을 설정해 주세요", Toast.LENGTH_LONG).show();
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e1) {
+                this.finish();
+            }
+            this.finish();
+        }
         createDatabase();
+        createIdentifier();
         db = dh.getWritableDatabase();
+        new GetDataBase(db).selectUsers();
         Cursor c = db.rawQuery("select * from identifier", null);
         if (c.getCount() > 0) {
             while(c.moveToNext()){
                 myApp.id = (c.getString(c.getColumnIndex("id")));
-                myApp.prk = (c.getString(c.getColumnIndex("prk")));
+            }
+            try {
+                myApp.tcp_sock = new ServerSocket(12223);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+                myApp.udp_sock = new DatagramSocket(12222);
+            } catch (SocketException e) {
+                e.printStackTrace();
             }
             Intent ParticipationIntent = new Intent(LoginActivity.this, VoteParticipationActivity.class);
             startActivity(ParticipationIntent);
         }
     }
 
-    public void onButtonAuthentication(View view) throws SocketException {
-        TelephonyManager telManager = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
-        String num = telManager.getLine1Number();
+    public void onButtonAuthentication(View view)  {
         getRsa rsa = null;
         try {
             rsa = new getRsa();
@@ -61,17 +84,10 @@ public class LoginActivity extends AppCompatActivity {
         }
         PublicKey Puk = (PublicKey) rsa.get_public();
         PrivateKey Prk = (PrivateKey) rsa.get_private();
-        String id = vote_block.hash(num);
-        String puk = rsa.encode_base64(Puk.getEncoded());
-        String prk = rsa.encode_base64(Prk.getEncoded());
-        try {
-            new PutDataBase(dh).insertIdentifier(id, prk);
-            new PutDataBase(dh).insertUsers(id, 1);
-        } catch (Exception e) {
-        }
+        String id = vote_block.hash(this.num);
+        db.execSQL("insert into identifier values('" +id+ "')");
+        new PutDataBase(dh).insertUsers(id, 1);
         myApp.id = id;
-        myApp.prk = prk;
-        myApp.puk = puk;
         try {
             myApp.tcp_sock = new ServerSocket(12223);
             myApp.udp_sock = new DatagramSocket(12222);
@@ -102,27 +118,9 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    private void createChainTable(String subject) {
-        db.execSQL("create table if not exists" +subject+ "_chain ("
-                + " idx INTEGER not null, "
-                + " deadline REAL not null default '0', "
-                + " subject TEXT not null default '-', "
-                + " constructor TEXT not null default '-', "
-                + " ver TEXT not null, "
-                + " time REAL not null, "
-                + " proof INTEGER not null default '0', "
-                + " previous_hash TEXT not null default '-', "
-                + " merkle_tree TEXT not null default '-', "
-                + " block_hash TEXT not null, "
-                + " primary key(idx));"
-        );
-    }
-
-    private void user_infoTable() {
-        String name = "user_info";
-        db.execSQL("create table if not exists " + name + "("
+    private void createIdentifier() {
+        db.execSQL("create table if not exists identifier ("
                 + " id text not null, "
-                + " pk text not null, "
                 + " primary key(id));"
         );
     }

@@ -16,6 +16,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -40,7 +41,7 @@ public class clientSocket {
     }
 
     public clientSocket (String subject, DatagramSocket udp_sock,
-                          String user, HashMap users, ArrayList<ArrayList> chainlist, ArrayList<InetAddress> addrlist) throws SocketException {
+                          String user, HashMap users, ArrayList<ArrayList> chainlist, ArrayList<InetAddress> addrlist) {
         this.udp_sock = udp_sock;
         this.subject = subject;
         this.user = user;
@@ -92,15 +93,18 @@ public class clientSocket {
         data.put("sender", this.user);
         data.put("encrypted", encrypt(pk));
         byte[] serializedMessage = message_serialize(data);
-        System.out.println(serializedMessage);
         broadcast(serializedMessage);
     }
 
-    public void broadcast_users(PrivateKey pk) throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
+    public void broadcast_users(String prik, String pubk) throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeySpecException {
+        getRsa rsa = new getRsa();
+        PrivateKey prk = (PrivateKey) rsa.decode_privateKey(prik);
+        PublicKey puk = (PublicKey) rsa.decode_publickey(pubk);
         HashMap<String, Object> data = new HashMap<>();
         data.put("Profit_Cut_userinfo"+this.subject, this.users);
         data.put("sender", this.user);
-        data.put("encrypted", encrypt(pk));
+        data.put("encrypted", encrypt(prk));
+        data.put("Key", puk);
         byte[] serializedMessage = message_serialize(data);
         broadcast(serializedMessage);
     }

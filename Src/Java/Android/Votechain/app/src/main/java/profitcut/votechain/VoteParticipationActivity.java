@@ -16,11 +16,17 @@ import android.widget.Toast;
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.ServerSocket;
+import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
 public class VoteParticipationActivity extends AppCompatActivity {
@@ -38,33 +44,26 @@ public class VoteParticipationActivity extends AppCompatActivity {
 
     }
 
-    public void onButtonMenu(View view) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException {
+    public void onButtonMenu(View view) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException, IOException {
         myApp.subject = vote_name_Text.getText().toString();
-//        myApp.constructor = "admin";
         createTable(myApp.subject);
-        if(((myApp.id != null) && (myApp.puk != null)))
-            new PutDataBase(dh).insertUserInfo(myApp.id, myApp.puk, myApp.subject+"_user_info");
-        if(getData()){
-            createGenesis();
+        if(getData()) {
+            Toast.makeText(getApplicationContext(), "투표 생성을 먼저 해주세요! (이미 진행중인 같은 주제의 투표와 합쳐질 수 있습니다)", Toast.LENGTH_LONG).show();
+            Intent MakeIntent = new Intent(VoteParticipationActivity.this, MakeVoteActivity.class);
+            startActivity(MakeIntent);
+        }else {
+                new PutDataBase(dh).insertIdentifier(myApp.subject + "_identifier", myApp.id, myApp.prk, myApp.puk);
+                new PutDataBase(dh).insertUserInfo(myApp.subject + "_user_info", myApp.id, myApp.puk);
+                if (((myApp.id != null) && (myApp.puk != null) && (myApp.prk != null))) {
+                    new clientSocket(myApp.id, myApp.udp_sock).broadcast_users(myApp.prk, myApp.puk);
+                }
+            Intent MenuIntent = new Intent(VoteParticipationActivity.this, MenuActivity.class);
+            startActivity(MenuIntent);
         }
-        Intent MenuIntent = new Intent(VoteParticipationActivity.this, MenuActivity.class);
-        startActivity(MenuIntent);
-    }
-
-    public void onButtonMake(View view) {
-        Intent MakeIntent = new Intent(VoteParticipationActivity.this, MakeVoteActivity.class);
-        startActivity(MakeIntent);
-    }
-
-    private void createGenesis() {
-        int index = 1;
-        myApp.candidates.add("A");
-        myApp.gh = new genesisblock_header(myApp.ver, index, Calendar.getInstance().getTimeInMillis() / 1000, myApp.deadline);
-        myApp.gb = new genesisblock(myApp.vb.hash(myApp.gh.toString()), myApp.subject, myApp.constructor, myApp.candidates, myApp.gh);
-        myApp.chain.add(0, myApp.gb);
     }
 
     private void createTable(String subject) {
+        createidentifier(subject);
         createchainTable(subject);
         createtransaction_poolTable(subject);
         createmerkle_treeTable(subject);
@@ -130,14 +129,24 @@ public class VoteParticipationActivity extends AppCompatActivity {
         );
     }
 
+    private void createidentifier(String subject) {
+        String name = subject+"_identifier";
+        db.execSQL("create table if not exists " + name + "("
+                + " id text not null, "
+                + " prk text not null, "
+                + " puk test not null, "
+                + " primary key(id));"
+        );
+    }
+
     private boolean getData() throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException {
         GetDataBase gd = new GetDataBase(db);
         ArrayList<Object> arr = gd.selectChain(myApp.subject + "_chain");
         if(arr.size() == 0) {
             return true;
         }
-        gd.selectUserInfo();
-        gd.selectUsers(myApp.subject + "_user_info");
+        myApp.users = (HashMap)gd.selectIdentifier(myApp.subject+"_identifier");
+        gd.selectUserinfo(myApp.subject + "_user_info");
         gd.selectVoters(myApp.subject + "_voters");
         gd.selectCandidates(myApp.subject + "_candidates");
 

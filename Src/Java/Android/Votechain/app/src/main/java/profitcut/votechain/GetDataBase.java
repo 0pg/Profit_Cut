@@ -24,7 +24,7 @@ public class GetDataBase extends AppCompatActivity {
         this.db = db;
     }
 
-    public HashMap<String, Integer> selectUserInfo() {
+    public HashMap<String, Integer> selectUsers() {
         String[] columns = {"id", "token"};
         HashMap<String, Integer> map = new HashMap<>();
         Cursor c1 = db.query("user_info", columns, null, null, null, null, null);
@@ -32,10 +32,12 @@ public class GetDataBase extends AppCompatActivity {
             map.put(c1.getString(c1.getColumnIndex("id")),c1.getInt(c1.getColumnIndex("token")));
         }
         myApp.nodes = map;
+        System.out.println(map.toString());
 
         return map;
     }
-    public HashMap<String, PublicKey> selectUsers(String name) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException {
+
+    public HashMap<String, PublicKey> selectUserinfo(String name) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException {
         String[] columns = {"id", "pk"};
         HashMap<String, PublicKey> map = new HashMap<>();
         Cursor c1 = db.query(name, columns, null, null, null, null, null);
@@ -106,9 +108,9 @@ public class GetDataBase extends AppCompatActivity {
     public HashMap selectMerkle(String name, int idx) {
         String[] colums = {"idx", "node_idx", "transaction_hash"};
         HashMap<Integer, String> map = new HashMap<>();
-        Cursor c1 = db.rawQuery("select node_idx transaction_hash from "+name+"_merkle_tree where idx="+idx, null);
+        Cursor c1 = db.rawQuery("select node_idx, transaction_hash from "+name+"_merkle_tree where idx="+idx, null);
         while(c1.moveToNext()){
-            map.put(c1.getInt(0), c1.getString(1));
+            map.put(c1.getInt(c1.getColumnIndex("node_idx")), c1.getString(c1.getColumnIndex("transaction_hash")));
         }
 
         return map;
@@ -116,7 +118,7 @@ public class GetDataBase extends AppCompatActivity {
 
     public ArrayList selectCandidates(String name) {
         String[] columns = {"candidate"};
-        ArrayList<Object> array = new ArrayList<>();
+        ArrayList<String> array = new ArrayList<>();
         Cursor c1 = db.query(name, columns, null, null, null, null, null);
 
         int recordCount = c1.getCount();
@@ -125,25 +127,23 @@ public class GetDataBase extends AppCompatActivity {
             c1.moveToNext();
             array.add(i, c1.getString(0));
         }
+        myApp.candidates =  array;
         return array;
     }
 
-    public Object selectIdentifier() {
-        String[] colums = {"id", "prk"};
-        ArrayList<Object> array = new ArrayList<>();
-        String sql = "select * from identifier";
+    public Object selectIdentifier(String name) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException {
+        HashMap<String, PublicKey> map = new HashMap<>();
+        String sql = "select id, puk, prk from "+name+";";
         Cursor c1 = db.rawQuery(sql, null);
-
-        int recordCount = c1.getCount();
-
+        getRsa rsa = new getRsa();
         if (c1.moveToFirst()) {
-            array.add(c1.getString(0));
-            array.add(c1.getString(1));
+            map.put(c1.getString(c1.getColumnIndex("id")), (PublicKey) rsa.decode_publickey(c1.getString(c1.getColumnIndex("puk"))));
+            myApp.prk = c1.getString(c1.getColumnIndex("prk"));
         }
 
-        if (recordCount == 0)
-            return false;
+        if (map.size() < 1)
+            return null;
         else
-            return array;
+            return map;
     }
 }

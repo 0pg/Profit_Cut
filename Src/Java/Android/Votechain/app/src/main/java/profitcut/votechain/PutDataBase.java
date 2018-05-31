@@ -35,7 +35,7 @@ public class PutDataBase extends AppCompatActivity {
         }
     }
 
-    public void insertUserInfo( String id, String puk, String name) {
+    public void insertUserInfo( String name, String id, String puk) {
         ContentValues recordValues = new ContentValues();
         try {
             String sql = "insert into " + name + " values('" + id + "', '" + puk + "');";
@@ -100,11 +100,14 @@ public class PutDataBase extends AppCompatActivity {
 
     }
 
-    public void insertIdentifier( String id, String prk) {
+    public void insertIdentifier( String name, String id, String prk, String puk) {
         ContentValues recoValues = new ContentValues();
-        String sql = "insert into identifier values('" + id +"', '" + prk +"');";
+        try {
+            String sql = "insert into " + name + " values('" + id + "', '" + prk + "', '" + puk + "');";
             db.execSQL(sql);
+        } catch (SQLiteException e){
 
+        }
     }
 
     /**

@@ -6,52 +6,87 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.LinearLayout;
+import android.widget.RadioGroup;
+import android.widget.TableRow;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
+import java.util.HashMap;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 
 public class VoteActivity extends AppCompatActivity {
+    dbHelper dh = new dbHelper(this);
+    LinearLayout tableLayout;
+    MyApplication myApp = (MyApplication) getApplication();
+    ArrayList<CheckBox> arr = new ArrayList<CheckBox>();
 
-    CheckBox limBox;
-    CheckBox kimBox;
-
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_vote);
+        tableLayout = (LinearLayout) findViewById(R.id.tableLayout);
 
-        limBox = (CheckBox) findViewById(R.id.limBox);
-        kimBox = (CheckBox) findViewById(R.id.kimBox);
-
-        limBox.setOnClickListener(new CheckBox.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (limBox.isChecked()) {
-                    if (kimBox.isChecked()) {
-                        kimBox.setChecked(false);
+        for (String candi : myApp.candidates) {
+            TableRow tr = new TableRow(this);
+            TextView tv = new TextView(this);
+            CheckBox cb = new CheckBox(this);
+            arr.add(cb);
+            cb.setOnClickListener(new View.OnClickListener() {
+                public void onClick (View view) {
+                    if (((CheckBox) view).isChecked()) {
+                        for (int i = 0; i < arr.size(); i++) {
+                            if (arr.get(i) == view);
+                            else arr.get(i).setChecked(false);
+                        }
+                    } else {
                     }
-                } else {
-
                 }
-            }
-        });
 
-        kimBox.setOnClickListener(new CheckBox.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (kimBox.isChecked()) {
-                    if (limBox.isChecked()) {
-                        limBox.setChecked(false);
-                    }
-                } else {
+            });
+            LinearLayout.LayoutParams param = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            param.topMargin = 10;
+            tr.setLayoutParams(param);
 
-                }
-            }
-        });
+            tv.setText(candi);
+
+            tr.addView(tv);
+            tr.addView(cb);
+            tableLayout.addView(tr);
+        }
+
+
+
+
     }
 
-    public void onButtonVote(View view) {
-        Intent MenuIntent = new Intent(VoteActivity.this, MenuActivity.class);
-        startActivity(MenuIntent);
+    public void onButtonVote (View view) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException, IOException {
+        for(CheckBox c : arr) {
+            if(c.isChecked()) {
+                HashMap transac = myApp.vb.new_transaction(myApp.id, (String) c.getText());
+                if(myApp.vb.add_transaction(transac)) {
+                    myApp.merkle_tree = myApp.vb.getMerkle_tree();
+                    myApp.cs.broadcast_transac(transac, (PrivateKey) new getRsa().decode_privateKey(myApp.prk));
+                    Toast.makeText(getApplicationContext(), "투표 완료", Toast.LENGTH_LONG).show();
+                    Intent MenuIntent = new Intent(VoteActivity.this, MenuActivity.class);
+                    startActivity(MenuIntent);
+                }
+                else {
+                    Toast.makeText(getApplicationContext(), "투표하실 수 없습니다", Toast.LENGTH_LONG).show();
+                    Intent MenuIntent = new Intent(VoteActivity.this, MenuActivity.class);
+                    startActivity(MenuIntent);
+                }
+            }
+        }
+
     }
 }
+

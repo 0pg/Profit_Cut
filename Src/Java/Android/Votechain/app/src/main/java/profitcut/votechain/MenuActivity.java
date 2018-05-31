@@ -14,6 +14,7 @@ import java.net.SocketException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -76,11 +77,11 @@ public class MenuActivity extends AppCompatActivity {
         startActivity(CheckIntent);
     }
 
-    public void onButtonParticipation(View view) throws InterruptedException {
-        Toast.makeText(getApplicationContext(), "체인 정보 저장하는 중...", Toast.LENGTH_LONG).show();
+    public void onButtonParticipation(View view) throws InterruptedException, NoSuchPaddingException, NoSuchAlgorithmException {
         myApp.flag = true;
         v.join();
         sM.join();
+        Toast.makeText(getApplicationContext(), "체인 정보 저장하는 중...", Toast.LENGTH_LONG).show();
         PutDataBase pd = new PutDataBase(dh);
         db.beginTransaction();
         pd.initTable(myApp.subject + "_chain");
@@ -88,6 +89,7 @@ public class MenuActivity extends AppCompatActivity {
         pd.initTable(myApp.subject + "_merkle_tree");
         pd.initTable(myApp.subject+"_candidates");
         pd.initTable(myApp.subject+"_voters");
+        pd.initTable(myApp.subject+"_user_info");
         for (Object b : myApp.chain) {
             if (b instanceof genesisblock) {
                 pd.insertChain(myApp.subject + "_chain", ((genesisblock) b).getGenesis_h().getIndex(), ((genesisblock) b).getGenesis_h().getDeadline(),
@@ -105,34 +107,39 @@ public class MenuActivity extends AppCompatActivity {
                     pd.insertVoters(myApp.subject + "_voters", map.get("voter"));
                 }
                 for (int i = 1; i <= ((block) b).getMerkle_tree().size(); i++) {
-                    pd.insertMerkleTree(myApp.subject, ((block) b).getBlock_h().getIndex(), i, ((block) b).getMerkle_tree().get(i));
+                    pd.insertMerkleTree(myApp.subject+"_merkle_tree", ((block) b).getBlock_h().getIndex(), i, ((block) b).getMerkle_tree().get(i));
+                }
+                for (String user : myApp.users.keySet()) {
+                    pd.insertUserInfo(myApp.subject+"_user_info", user, new getRsa().encode_base64(myApp.users.get(user).getEncoded()));
                 }
             }
         }
         db.setTransactionSuccessful();
         db.endTransaction();
         myApp.init();
+        Thread.sleep(1500);
         Intent ParticipationIntent = new Intent(MenuActivity.this, VoteParticipationActivity.class);
         startActivity(ParticipationIntent);
     }
 
     private synchronized void createBlock() throws InterruptedException {
-        myApp.vb.add_transaction(myApp.vb.new_transaction(myApp.id, "A"));
-        System.out.println(myApp.chain.size());
+        myApp.merkle_tree = myApp.vb.getMerkle_tree();
         if (myApp.chain.get(myApp.chain.size() - 1) instanceof genesisblock) {
             genesisblock gb = (genesisblock) myApp.chain.get(0);
             myApp.bh = new block_header("V.1.0.0", myApp.chain.size() + 1,
                     ((genesisblock) myApp.chain.get(myApp.chain.size() - 1)).getBlock_hash(),
                     myApp.merkle_tree.get(1));
+            myApp.b = new block(myApp.current_transactions, myApp.merkle_tree, myApp.bh);
+
         } else {
             myApp.bh = new block_header("V.1.0.0", myApp.chain.size() + 1,
                     ((block) myApp.chain.get(myApp.chain.size() - 1)).getBlock_hash(),
                     myApp.merkle_tree.get(1));
+            myApp.b = new block(myApp.current_transactions, myApp.merkle_tree, myApp.bh);
         }
         p.start();
         p.join();
 
-        myApp.b = new block(myApp.current_transactions, myApp.merkle_tree, myApp.bh);
 
         v.start();
 
@@ -144,31 +151,33 @@ public class MenuActivity extends AppCompatActivity {
     }
 
     public void hashing() {
-        System.out.println(myApp.b.getBlock_hash());
-        System.out.println(myApp.vb.hash(myApp.b.getBlock_h().toString()));
-        if (myApp.vb.valid_block(myApp.b, myApp.chain)) {
-            System.out.println(myApp.b.getBlock_hash().equals(myApp.vb.hash(myApp.b.getBlock_h().toString())));
-            myApp.current_transactions = new ArrayList<>();
-            myApp.vc.add_block(myApp.b);
-            try {
-                getRsa rsa = new getRsa();
-                PrivateKey prk = (PrivateKey) rsa.decode_privateKey(myApp.prk);
-                new clientSocket(myApp.id, new DatagramSocket(12222)).broadcast_block(myApp.b, prk);
-            } catch (NoSuchAlgorithmException e) {
-                e.printStackTrace();
-            } catch (NoSuchPaddingException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (InvalidKeyException e) {
-                e.printStackTrace();
-            } catch (IllegalBlockSizeException e) {
-                e.printStackTrace();
-            } catch (BadPaddingException e) {
-                e.printStackTrace();
-            } catch (InvalidKeySpecException e) {
-                e.printStackTrace();
+        try {
+            if (myApp.vb.valid_block(myApp.b, myApp.chain)) {
+                System.out.println(myApp.b.getBlock_hash().equals(myApp.vb.hash(myApp.b.getBlock_h().toString())));
+                myApp.current_transactions = new ArrayList<>();
+                myApp.vc.add_block(myApp.b);
+                try {
+                    getRsa rsa = new getRsa();
+                    PrivateKey prk = (PrivateKey) rsa.decode_privateKey(myApp.prk);
+                    new clientSocket(myApp.id, new DatagramSocket(12222)).broadcast_block(myApp.b, prk);
+                } catch (NoSuchAlgorithmException e) {
+                    e.printStackTrace();
+                } catch (NoSuchPaddingException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (InvalidKeyException e) {
+                    e.printStackTrace();
+                } catch (IllegalBlockSizeException e) {
+                    e.printStackTrace();
+                } catch (BadPaddingException e) {
+                    e.printStackTrace();
+                } catch (InvalidKeySpecException e) {
+                    e.printStackTrace();
+                }
             }
+        } catch (NullPointerException e) {
+
         }
     }
 
@@ -186,14 +195,14 @@ public class MenuActivity extends AppCompatActivity {
                 } catch (NullPointerException e) {
                     break;
                 }
-            } while (!myApp.vb.valid_proof(myApp.bh));
+            } while (!myApp.vb.valid_proof(myApp.bh) && !myApp.flag);
         }
     }
 
     class startMining extends Thread {
         public synchronized void run() {
             try {
-                while (myApp.flag == false) {
+                while (!myApp.flag) {
                     createBlock();
                 }
             } catch (InterruptedException e) {

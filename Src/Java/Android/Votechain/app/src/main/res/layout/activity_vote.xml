@@ -37,9 +37,10 @@
             android:stretchColumns="*"
             android:layout_marginTop="50dp"
             android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp">
+            android:layout_marginRight="10dp"
+            android:id="@+id/tableLayout">
 
-            <TableRow
+            <!--<TableRow
                 android:background="#ffffff"
                 android:padding="8dp"
                 android:stretchColumns="*">
@@ -89,7 +90,7 @@
                     android:layout_margin="1dp"
                     android:buttonTint="@color/colorPrimaryDark"
                     android:id="@+id/kimBox"/>
-            </TableRow>
+            </TableRow>-->
 
         </TableLayout>
 
