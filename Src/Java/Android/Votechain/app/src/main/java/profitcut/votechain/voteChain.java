@@ -335,13 +335,14 @@ class vote_block {
         genesisblock_header genesis_h = ((genesisblock)chain.get(0)).getGenesis_h();
         block_header block_h = block.getBlock_h();
 
-        if(chain.size() > 2) {
+        if(chain.size() >= 2) {
             block_header last_h = last_block(chain).getBlock_h();
 
             if(block_h.getTime() > genesis_h.getDeadline()) {return false;}
             if(block_h.getIndex() != last_h.getIndex()+1) {return false;}
             if(!valid_proof(block_h)) {return false;}
             if(!block_h.getPrevious_hash().equals(hash(last_h.toString()))) {return false;}
+            if(!hash(block_h.toString()).equals(block.getBlock_hash())) {return false;}
 
             return true;
         }
@@ -350,6 +351,7 @@ class vote_block {
             if(block_h.getIndex() != genesis_h.getIndex()+1) {return false;}
             if(!valid_proof(block_h)) {return false;}
             if(!block_h.getPrevious_hash().equals(hash(genesis_h.toString()))) {return false;}
+            if(!hash(block_h.toString()).equals(block.getBlock_hash())) {return false;}
 
             return true;
         }

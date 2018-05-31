@@ -147,8 +147,6 @@ public class clientSocket {
         byte[] ipAddr = new byte[] {-1, -1, -1, -1};
         InetAddress addr = InetAddress.getByAddress(ipAddr);
         DatagramPacket p = new DatagramPacket(msg, msg.length, addr, this.udp_port);
-        System.out.println(p);
-        System.out.println(this.udp_sock);
         this.udp_sock.send(p);
     }
 

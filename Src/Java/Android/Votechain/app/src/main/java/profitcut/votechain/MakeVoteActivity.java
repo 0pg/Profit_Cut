@@ -69,7 +69,6 @@ public class MakeVoteActivity extends AppCompatActivity {
         for (EditText can : arr) {
             myApp.candidates.add(String.valueOf(can.getText()));
         }
-        System.out.println(Integer.valueOf(String.valueOf(year.getText())));
         myApp.deadline = myApp.vb.deadline(Integer.valueOf(String.valueOf(year.getText())), Integer.valueOf(String.valueOf(month.getText())),
                 Integer.valueOf(String.valueOf(day.getText())),Integer.valueOf(String.valueOf(hour.getText())));
         createGenesis();

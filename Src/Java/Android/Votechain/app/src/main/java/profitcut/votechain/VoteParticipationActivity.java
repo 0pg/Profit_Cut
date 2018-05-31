@@ -92,8 +92,8 @@ public class VoteParticipationActivity extends AppCompatActivity {
         String name = subject + "_transaction_pool";
         db.execSQL("create table if not exists " + name + "("
                 + " idx integer not null, "
-                + " voter text not null, "
-                + " candidate text not null, "
+                + " voter text , "
+                + " candidate text , "
                 + " primary key(idx));");
     }
 
@@ -101,8 +101,8 @@ public class VoteParticipationActivity extends AppCompatActivity {
         String name = subject + "_merkle_tree";
         db.execSQL("create table if not exists " + name + "("
                 + " idx integer not null, "
-                + " node_idx integer not null, "
-                + " transaction_hash text not null, "
+                + " node_idx integer , "
+                + " transaction_hash text, "
                 + " primary key(idx));");
     }
 
