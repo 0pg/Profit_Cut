@@ -87,6 +87,7 @@ public class serverSocket implements Runnable{
         if(data.containsKey("Profit_Cut_info")){
             buf = "Profit_OK".getBytes();
             packet = new DatagramPacket(buf, buf.length, address, 12222);
+            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
             this.udp_sock.send(packet);
             ThreadHandler3 th3 = new ThreadHandler3();
             th3.start();
