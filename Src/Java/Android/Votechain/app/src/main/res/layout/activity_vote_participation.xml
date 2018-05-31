@@ -45,6 +45,8 @@
                 android:textColorHint="#ffffff"
                 android:id="@+id/vote_name_Text"
                 android:layout_marginTop="50dp"
+                android:singleLine="true"
+                android:imeOptions="actionGo"
                 android:background="@color/colorPrimaryDark" />
 
             <Button
@@ -58,18 +60,6 @@
                 android:text="투표 참여"
                 android:layout_marginTop="10dp"
                 android:layout_gravity="center" />
-
-<!--            <Button
-                android:layout_width="280dp"
-                android:layout_height="wrap_content"
-                android:textSize="20dp"
-                android:textStyle="bold"
-                android:textColor="@color/colorPrimaryDark"
-                android:background="@color/colorPrimary"
-                android:onClick="onButtonMake"
-                android:text="투표 생성"
-                android:layout_marginTop="80dp"
-                android:layout_gravity="center" />-->
         </LinearLayout>
     </LinearLayout>
 

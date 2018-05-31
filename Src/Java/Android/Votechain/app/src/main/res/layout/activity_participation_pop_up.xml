@@ -44,6 +44,7 @@
                 android:hint="후보자 수"
                 android:textColorHint="#ffffff"
                 android:inputType="number"
+                android:maxLength="1"
                 android:id="@+id/candidate_Num"/>
         </LinearLayout>
 
