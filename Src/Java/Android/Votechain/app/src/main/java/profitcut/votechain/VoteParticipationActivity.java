@@ -49,9 +49,11 @@ public class VoteParticipationActivity extends AppCompatActivity {
         myApp.subject = vote_name_Text.getText().toString();
         createTable(myApp.subject);
         if(getData()) {
-            Toast.makeText(getApplicationContext(), "투표 생성을 먼저 해주세요! (이미 진행중인 같은 주제의 투표와 합쳐질 수 있습니다)", Toast.LENGTH_LONG).show();
+            Intent PopupIntent = new Intent(VoteParticipationActivity.this, ParticipationPopUpActivity.class);
+            startActivity(PopupIntent);
+/*            Toast.makeText(getApplicationContext(), "투표 생성을 먼저 해주세요! (이미 진행중인 같은 주제의 투표와 합쳐질 수 있습니다)", Toast.LENGTH_LONG).show();
             Intent MakeIntent = new Intent(VoteParticipationActivity.this, MakeVoteActivity.class);
-            startActivity(MakeIntent);
+            startActivity(MakeIntent);*/
         }else {
                 new PutDataBase(dh).insertIdentifier(myApp.subject + "_identifier", myApp.id, myApp.prk, myApp.puk);
                 new PutDataBase(dh).insertUserInfo(myApp.subject + "_user_info", myApp.id, myApp.puk);

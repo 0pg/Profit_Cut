@@ -15,6 +15,7 @@ import java.util.LinkedHashMap;
 
 public class MyApplication extends Application {
     final static String ver = "V1.0.0";
+    static int candidate_Num = 0;
     static float deadline;
     static String constructor;
     static String id;
@@ -43,6 +44,7 @@ public class MyApplication extends Application {
     static boolean flag = true;
 
     public static void init(){
+        candidate_Num = 0;
          deadline = 0;
          constructor = null;
          subject = null;

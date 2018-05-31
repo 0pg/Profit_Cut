@@ -33,7 +33,7 @@ public class MakeVoteActivity extends AppCompatActivity {
     MyApplication myApp = (MyApplication)getApplication();
     LinearLayout candidatesLayout;
     EditText year, month, day, hour;
-    int getNumber = 2;
+    int candidateNum = myApp.candidate_Num;
     ArrayList<EditText> arr = new ArrayList<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,7 +46,7 @@ public class MakeVoteActivity extends AppCompatActivity {
 
         candidatesLayout = (LinearLayout)findViewById(R.id.candidatesLayout);
 
-        for (int i = 0; i < getNumber; i++) {
+        for (int i = 0; i < candidateNum; i++) {
             EditText candidateText = new EditText(this);
             LinearLayout.LayoutParams param = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             param.topMargin = 10;

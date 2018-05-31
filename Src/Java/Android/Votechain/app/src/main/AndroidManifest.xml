@@ -37,7 +37,9 @@
         <activity android:name=".VotingStateActivity" />
         <activity android:name=".CheckChainActivity" />
         <activity android:name=".TestActivity" />
-        <activity android:name=".MakeVoteActivity"></activity>
+        <activity android:name=".MakeVoteActivity" />
+        <activity android:name=".ParticipationPopUpActivity"
+            android:theme="@android:style/Theme.DeviceDefault.Light.Dialog.NoActionBar"></activity>
     </application>
 
 </manifest>
