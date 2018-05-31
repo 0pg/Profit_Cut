@@ -3,6 +3,7 @@ package profitcut.votechain;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -39,6 +40,10 @@ public class VoteActivity extends AppCompatActivity {
             TableRow tr = new TableRow(this);
             TextView tv = new TextView(this);
             CheckBox cb = new CheckBox(this);
+            tv.setGravity(Gravity.CENTER);
+            tv.setTextSize(20);
+            cb.setGravity(Gravity.CENTER);
+            cb.setBackgroundResource(R.color.colorPrimaryDark);
             cb.setOnClickListener(new View.OnClickListener() {
                 public void onClick (View view) {
                     if (((CheckBox) view).isChecked()) {

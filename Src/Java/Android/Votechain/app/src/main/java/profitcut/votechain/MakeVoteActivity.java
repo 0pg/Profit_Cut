@@ -33,7 +33,7 @@ public class MakeVoteActivity extends AppCompatActivity {
     MyApplication myApp = (MyApplication)getApplication();
     LinearLayout candidatesLayout;
     EditText year, month, day, hour;
-    int getNumber = 4;
+    int getNumber = 2;
     ArrayList<EditText> arr = new ArrayList<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
