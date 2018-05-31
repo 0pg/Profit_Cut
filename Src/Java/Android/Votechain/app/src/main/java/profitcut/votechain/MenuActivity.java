@@ -133,13 +133,13 @@ public class MenuActivity extends AppCompatActivity {
         if (myApp.chain.get(myApp.chain.size() - 1) instanceof genesisblock) {
             System.out.println("if");
             genesisblock gb = (genesisblock) myApp.chain.get(0);
-            myApp.bh = new block_header("V.1.0.0", myApp.chain.size() + 1,
+            myApp.bh = new block_header("V.1.0.0", myApp.chain.size() + 1,Calendar.getInstance().getTimeInMillis() / 1000 ,
                     ((genesisblock) myApp.chain.get(myApp.chain.size() - 1)).getBlock_hash(),
                     myApp.merkle_tree.get(1));
 
         } else {
             System.out.println("else");
-            myApp.bh = new block_header("V.1.0.0", myApp.chain.size() + 1,
+            myApp.bh = new block_header("V.1.0.0", myApp.chain.size() + 1, Calendar.getInstance().getTimeInMillis() / 1000,
                     ((block) myApp.chain.get(myApp.chain.size() - 1)).getBlock_hash(),
                     myApp.merkle_tree.get(1));
         }

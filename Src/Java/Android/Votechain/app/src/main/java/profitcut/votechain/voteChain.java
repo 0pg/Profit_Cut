@@ -125,12 +125,12 @@ class block_header implements Serializable{
         this.previous_hash = previous_hash;
         this.merkle_root = merkle_root;
     }
-    public block_header(String ver, int index, String previous_hash, String merkle_root) {
+    public block_header(String ver, int index, float time, String previous_hash, String merkle_root) {
         super();
         this.ver = ver;
         this.index = index;
         this.proof = 0;
-        this.time = Calendar.getInstance().getTimeInMillis() / 1000;
+        this.time = time;
         this.previous_hash = previous_hash;
         this.merkle_root = merkle_root;
     }
