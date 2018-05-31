@@ -43,7 +43,7 @@ public class VoteActivity extends AppCompatActivity {
             tv.setGravity(Gravity.CENTER);
             tv.setTextSize(20);
             cb.setGravity(Gravity.CENTER);
-            cb.setBackgroundResource(R.color.colorPrimaryDark);
+
             cb.setOnClickListener(new View.OnClickListener() {
                 public void onClick (View view) {
                     if (((CheckBox) view).isChecked()) {
