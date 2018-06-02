@@ -158,6 +158,7 @@ class block_header implements Serializable{
     }
     public void setProof(int proof) {
         this.proof += proof;
+        this.time = Calendar.getInstance().getTimeInMillis() / 1000000;
     }
 
 
@@ -357,10 +358,11 @@ class vote_block {
         }
     }
 
-    public void proof_of_work(block_header block_h) {
+    public boolean proof_of_work(block_header block_h) {
         while(!valid_proof(block_h)) {
             block_h.setProof(1);
         }
+        return true;
     }
 
     public static boolean valid_proof(block_header block_h) {

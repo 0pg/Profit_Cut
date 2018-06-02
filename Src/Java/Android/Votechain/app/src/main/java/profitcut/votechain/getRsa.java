@@ -102,14 +102,4 @@ public class getRsa {
         byte[] base64 = Base64.decode(key, Base64.NO_WRAP);
         return base64;
     }
-    public static void main(String[] args) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeySpecException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-        getRsa rsa = new getRsa();
-        String msg = "hello";
-        getRsa rsa1 = new getRsa();
-        PublicKey k = (PublicKey) rsa1.get_public();
-        String pk = rsa.encode_base64(rsa.get_private().getEncoded());
-        PrivateKey prk = (PrivateKey) rsa.decode_privateKey(pk);
-        byte[] a = rsa.encryption(msg, prk);
-        String b = rsa.decryption(rsa.encode_base64(a), k);
-    }
 }

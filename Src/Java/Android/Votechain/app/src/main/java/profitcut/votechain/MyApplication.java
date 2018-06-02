@@ -42,6 +42,7 @@ public class MyApplication extends Application {
     static block_header bh;
     static block b;
     static boolean flag = true;
+    static boolean init_flag = false;
 
     public static void init(){
         candidate_Num = 0;
@@ -64,6 +65,7 @@ public class MyApplication extends Application {
          gb = null;
          bh = null;
          b = null;
+         init_flag = true;
     }
 
 }
