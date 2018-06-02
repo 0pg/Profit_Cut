@@ -13,6 +13,8 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.w3c.dom.Text;
+
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -26,8 +28,11 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
 public class VoteActivity extends AppCompatActivity {
-    dbHelper dh = new dbHelper(this);
+
     LinearLayout tableLayout;
+    TextView subjectText;
+
+    dbHelper dh = new dbHelper(this);
     MyApplication myApp = (MyApplication) getApplication();
     HashMap<CheckBox, TextView> arr = new HashMap<>();
 
@@ -35,6 +40,8 @@ public class VoteActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_vote);
         tableLayout = (LinearLayout) findViewById(R.id.tableLayout);
+        subjectText = (TextView) findViewById(R.id.subject_Text);
+        subjectText.setText(myApp.subject);
 
         for (String candi : myApp.candidates) {
             TableRow tr = new TableRow(this);

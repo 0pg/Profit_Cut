@@ -21,12 +21,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="컴퓨터과학과 학생회 투표"
                 android:textColor="#ffffff"
                 android:textSize="30dp"
                 android:textStyle="bold"
                 android:layout_marginTop="10dp"
-                android:layout_marginBottom="10dp"/>
+                android:layout_marginBottom="10dp"
+                android:id="@+id/subject_Text"/>
         </LinearLayout>
 
         <TableLayout
