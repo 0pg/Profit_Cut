@@ -83,7 +83,7 @@ public class VoteActivity extends AppCompatActivity {
     public void onButtonVote (View view) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException, IOException {
         for(CheckBox c : arr.keySet()) {
             if(c.isChecked()) {
-                HashMap transac = myApp.vb.new_transaction(myApp.id, (String)arr.get(c).getText());
+                HashMap transac = myApp.vb.new_transaction(myApp.id, (String) arr.get(c).getText());
                 if(myApp.vb.add_transaction(transac)) {
                     myApp.merkle_tree = myApp.vb.getMerkle_tree();
                     myApp.cs.broadcast_transac(transac, (PrivateKey) new getRsa().decode_privateKey(myApp.prk));

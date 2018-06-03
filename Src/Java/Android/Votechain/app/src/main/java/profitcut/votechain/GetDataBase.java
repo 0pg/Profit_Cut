@@ -32,7 +32,6 @@ public class GetDataBase extends AppCompatActivity {
             map.put(c1.getString(c1.getColumnIndex("id")),c1.getInt(c1.getColumnIndex("token")));
         }
         myApp.nodes = map;
-        System.out.println(map.toString());
 
         return map;
     }

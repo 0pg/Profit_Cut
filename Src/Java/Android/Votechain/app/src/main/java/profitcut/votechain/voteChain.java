@@ -41,6 +41,10 @@ class genesisblock_header implements Serializable{
     public float getDeadline() {
         return deadline;
     }
+
+    public String header() {
+        return ver + index + time + deadline;
+    }
     @Override
     public String toString() {
         return "[ver=" + ver + ", index=" + index + ", time="
@@ -68,7 +72,7 @@ class genesisblock implements Serializable{
 
     public genesisblock(String constructor,String subject, ArrayList candidates, genesisblock_header genesis_h) {
         super();
-        this.block_hash = vote_block.hash(genesis_h.toString());
+        this.block_hash = vote_block.hash(genesis_h.header());
         this.subject = subject;
         this.constructor = constructor;
         this.candidates = candidates;
@@ -158,9 +162,11 @@ class block_header implements Serializable{
     }
     public void setProof(int proof) {
         this.proof += proof;
-        this.time = Calendar.getInstance().getTimeInMillis() / 1000000;
+        this.time = Calendar.getInstance().getTimeInMillis() / 1000;
     }
-
+    public String header() {
+        return ver + index + proof + time + previous_hash + merkle_root;
+    }
 
     @Override
     public String toString() {
@@ -188,7 +194,7 @@ class block implements Serializable{
     public block(ArrayList<HashMap> transaction_pool, HashMap<Integer, String> merkle_tree,
                  block_header block_h) {
         super();
-        this.block_hash = vote_block.hash(block_h.toString());
+        this.block_hash = vote_block.hash(block_h.header());
         this.transaction_pool = transaction_pool;
         this.merkle_tree = merkle_tree;
         this.block_h = block_h;
@@ -242,7 +248,7 @@ class vote_chain {
             block block = (block)chain.get(current_index);
             block_header block_h = block.getBlock_h();
 
-            if(block_h.getPrevious_hash().equals(vote_block.hash(last_block.toString()))) return false;
+            if(block_h.getPrevious_hash().equals(vote_block.hash(last_block.getBlock_h().header()))) return false;
             if(!vote_block.valid_proof(block_h)) return false;
             if(block_h.getTime() > ((genesisblock_header)chain.get(0)).getDeadline()) return false;
 
@@ -335,24 +341,22 @@ class vote_block {
     public boolean valid_block(block block, ArrayList<Object> chain) {
         genesisblock_header genesis_h = ((genesisblock)chain.get(0)).getGenesis_h();
         block_header block_h = block.getBlock_h();
-
         if(chain.size() >= 2) {
             block_header last_h = last_block(chain).getBlock_h();
-
             if(block_h.getTime() > genesis_h.getDeadline()) {return false;}
             if(block_h.getIndex() != last_h.getIndex()+1) {return false;}
             if(!valid_proof(block_h)) {return false;}
-            if(!block_h.getPrevious_hash().equals(hash(last_h.toString()))) {return false;}
-            if(!hash(block_h.toString()).equals(block.getBlock_hash())) {return false;}
+            if(!block_h.getPrevious_hash().equals(hash(last_h.header()))) {return false;}
+            if(!hash(block_h.header()).equals(block.getBlock_hash())) {return false;}
 
             return true;
         }
         else {
-            if(block_h.getTime() > genesis_h.getDeadline()) {return false;}
-            if(block_h.getIndex() != genesis_h.getIndex()+1) {return false;}
-            if(!valid_proof(block_h)) {return false;}
-            if(!block_h.getPrevious_hash().equals(hash(genesis_h.toString()))) {return false;}
-            if(!hash(block_h.toString()).equals(block.getBlock_hash())) {return false;}
+            if(block_h.getTime() > genesis_h.getDeadline()) { System.out.println(1);return false;}
+            if(block_h.getIndex() != genesis_h.getIndex()+1) { System.out.println(2);return false;}
+            if(!valid_proof(block_h)) { System.out.println(3);return false;}
+            if(!block_h.getPrevious_hash().equals(hash(genesis_h.header()))) {System.out.println(4); return false;}
+            if(!hash(block_h.header()).equals(block.getBlock_hash())) {System.out.println(5); return false;}
 
             return true;
         }
@@ -367,8 +371,8 @@ class vote_block {
 
     public static boolean valid_proof(block_header block_h) {
             try {
-                String guess_hash = hash(block_h.toString());
-                if (guess_hash.substring(0, 4).equals("0000")) return true;
+           //     String guess_hash = hash(block_h.toString());
+                if (hash(block_h.header()).substring(0, 4).equals("0000")) return true;
                 else return false;
             } catch (NullPointerException e) {
                 return false;
@@ -382,7 +386,7 @@ class vote_block {
         if(day > 31 || day < 1) return 0;
         if(hour > 23 || hour < 0) return 0;
         c.set(year, month, day, hour, 0, 0);
-        return c.getTimeInMillis()/1000;
+        return c.getTimeInMillis() / 1000;
     }
 
     public void transaction_record() {

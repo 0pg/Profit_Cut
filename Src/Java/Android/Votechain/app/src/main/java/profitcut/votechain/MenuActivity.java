@@ -19,6 +19,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -29,25 +30,22 @@ import javax.crypto.NoSuchPaddingException;
 
 public class MenuActivity extends AppCompatActivity {
     MyApplication myApp = (MyApplication) getApplication();
-    SQLiteDatabase db;
-    dbHelper dh = new dbHelper(this);
-    static int runningThread = 0;
-    startMining sM = new startMining();
- //   valid v = new valid();
+    //   valid v = new valid();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menu);
-        db = dh.getWritableDatabase();
-        get_features();
         Toast.makeText(getApplicationContext(), String.valueOf(myApp.flag), Toast.LENGTH_LONG).show();
-        try {
-            open_socket();
-        } catch (IOException e) {
-        }
+        myApp.init_flag = false;
         if (myApp.flag) {
             myApp.flag = false;
+            try {
+                open_socket();
+            } catch (IOException e) {
+            }
+            get_features();
+            startMining sM = new startMining();
             sM.start();
         }
     }
@@ -82,14 +80,18 @@ public class MenuActivity extends AppCompatActivity {
     }
 
     public void onButtonParticipation(View view) throws InterruptedException, NoSuchPaddingException, NoSuchAlgorithmException {
+        SQLiteDatabase db;
+        dbHelper dh;
+        dh = new dbHelper(this);
+        db = dh.getWritableDatabase();
+
         String subject = myApp.subject;
         HashMap<String, PublicKey> users = myApp.users;
         ArrayList<Object> chain = myApp.chain;
         myApp.flag = true;
-      //  sM.join();
+
         Toast.makeText(getApplicationContext(), "체인 정보 저장하는 중...", Toast.LENGTH_LONG).show();
         PutDataBase pd = new PutDataBase(dh);
-        System.out.println(subject);
         db.beginTransaction();
         pd.initTable(subject + "_chain");
         pd.initTable(subject + "_transaction_pool");
@@ -123,22 +125,19 @@ public class MenuActivity extends AppCompatActivity {
         }
         db.setTransactionSuccessful();
         db.endTransaction();
+        myApp.ss.setStopped(true);
         Thread.sleep(1500);
         Intent ParticipationIntent = new Intent(MenuActivity.this, VoteParticipationActivity.class);
         startActivity(ParticipationIntent);
     }
 
     private void createBlock() throws InterruptedException {
-        System.out.println("in create");
         if (myApp.chain.get(myApp.chain.size() - 1) instanceof genesisblock) {
-            System.out.println("if");
-            genesisblock gb = (genesisblock) myApp.chain.get(0);
-            myApp.bh = new block_header("V.1.0.0", myApp.chain.size() + 1,Calendar.getInstance().getTimeInMillis() / 1000 ,
+            myApp.bh = new block_header("V.1.0.0", myApp.chain.size() + 1,Calendar.getInstance().getTimeInMillis() / 1000,
                     ((genesisblock) myApp.chain.get(myApp.chain.size() - 1)).getBlock_hash(),
                     myApp.merkle_tree.get(1));
 
         } else {
-            System.out.println("else");
             myApp.bh = new block_header("V.1.0.0", myApp.chain.size() + 1, Calendar.getInstance().getTimeInMillis() / 1000,
                     ((block) myApp.chain.get(myApp.chain.size() - 1)).getBlock_hash(),
                     myApp.merkle_tree.get(1));
@@ -146,7 +145,6 @@ public class MenuActivity extends AppCompatActivity {
         pow p = new pow();
         p.start();
         p.join();
-        System.out.println("pstart");
         hashing(myApp.bh);
     }
 
@@ -156,18 +154,19 @@ public class MenuActivity extends AppCompatActivity {
 
     public void hashing(block_header bh) {
         try {
-            System.out.println("hashin");
-            String hash = myApp.vb.hash(bh.toString());
-            System.out.println("wrong: "+ hash);
-            block b = new block(myApp.current_transactions,myApp.merkle_tree, bh);
+            ArrayList<HashMap> current_transactions = (ArrayList<HashMap>) myApp.current_transactions.clone();
+            HashMap<Integer, String> merkle = (HashMap<Integer, String>) myApp.merkle_tree.clone();
+            bh.setMerkle_root(merkle.get(1));
+            block b = new block(current_transactions, merkle, bh);
+            System.out.println(b.getBlock_hash());
             if (myApp.vb.valid_block(b, myApp.chain)) {
-                System.out.println("right!!!!!: "+ hash);
-                myApp.current_transactions = new ArrayList<>();
                 myApp.chain.add(b);
+                myApp.merkle_tree.clear();
+                myApp.current_transactions.clear();
                 try {
                     getRsa rsa = new getRsa();
                     PrivateKey prk = (PrivateKey) rsa.decode_privateKey(myApp.prk);
-                    new clientSocket(myApp.id, myApp.udp_sock).broadcast_block(b, prk);
+                    new clientSocket(myApp.id, myApp.udp_sock).broadcast_block(myApp.b, prk);
                 } catch (NoSuchAlgorithmException e) {
                     e.printStackTrace();
                 } catch (NoSuchPaddingException e) {
@@ -190,8 +189,10 @@ public class MenuActivity extends AppCompatActivity {
     }
 
     class pow extends  Thread {
-        public synchronized void run() {
-            myApp.vb.proof_of_work(myApp.bh);
+        public void run() {
+            while(!myApp.vb.valid_proof(myApp.bh) && !myApp.flag) {
+                myApp.bh.setProof(1);
+            }
         }
     }
 
@@ -210,18 +211,13 @@ public class MenuActivity extends AppCompatActivity {
 
     class startMining extends Thread {
         public synchronized void run() {
-            MenuActivity.runningThread ++;
             try {
-                while (!myApp.flag) {
-                    System.out.println("_createblock");
+                while (!myApp.flag && !myApp.init_flag) {
                     createBlock();
-                    System.out.println("creat_");
-                    System.out.println("2222222222222");
                 }
             } catch (InterruptedException e) {
 
             }
-            MenuActivity.runningThread --;
         }
     }
 
