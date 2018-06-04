@@ -95,7 +95,7 @@ public class MakeVoteActivity extends AppCompatActivity {
     private void createGenesis() {
         int index = 1;
         myApp.constructor = myApp.id;
-        myApp.gh = new genesisblock_header(myApp.ver, index, Calendar.getInstance().getTimeInMillis() / 1000, myApp.deadline);
+        myApp.gh = new genesisblock_header(myApp.ver, index, Calendar.getInstance().getTimeInMillis()/1000, myApp.deadline);
         myApp.gb = new genesisblock(myApp.vb.hash(myApp.gh.header()), myApp.subject, myApp.constructor, myApp.candidates, myApp.gh);
         myApp.chain.add(0, myApp.gb);
     }

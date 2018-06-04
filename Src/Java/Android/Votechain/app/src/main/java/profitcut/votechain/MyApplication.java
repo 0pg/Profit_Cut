@@ -16,7 +16,7 @@ import java.util.LinkedHashMap;
 public class MyApplication extends Application {
     final static String ver = "V1.0.0";
     static int candidate_Num = 0;
-    static float deadline;
+    static long deadline;
     static String constructor;
     static String id;
     static String prk;
@@ -43,6 +43,7 @@ public class MyApplication extends Application {
     static block b;
     static boolean flag = true;
     static boolean init_flag = false;
+    static int tmp = 0;
 
     public static void init(){
         candidate_Num = 0;
