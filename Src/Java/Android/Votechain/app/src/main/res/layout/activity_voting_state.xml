@@ -39,20 +39,11 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="선거일 : 2018 - 05 - 24"
                 android:textColor="#000000"
                 android:textSize="20dp"
                 android:textStyle="bold"
-                android:layout_marginTop="10dp"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="투표율 : 77.20%"
-                android:textColor="#000000"
-                android:textSize="20dp"
-                android:textStyle="bold"
-                android:layout_marginTop="10dp"/>
+                android:layout_marginTop="10dp"
+                android:id="@+id/dateTextView"/>
         </LinearLayout>
 
         <LinearLayout
@@ -77,9 +68,10 @@
                 android:background="@color/colorBackground"
                 android:padding="8dp"
                 android:stretchColumns="*"
-                android:layout_margin="8dp">
+                android:layout_margin="8dp"
+                android:id="@+id/candidateTableLayout">
 
-                <TableRow
+                <!--<TableRow
                     android:padding="8dp"
                     android:stretchColumns="*">
                     <TextView
@@ -115,7 +107,7 @@
                         android:textColor="#000000"
                         android:text="득표율 : 36.12%"
                         android:layout_margin="1dp"/>
-                </TableRow>
+                </TableRow>-->
 
             </TableLayout>
         </LinearLayout>

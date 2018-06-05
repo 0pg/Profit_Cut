@@ -40,58 +40,6 @@
             android:layout_marginRight="10dp"
             android:id="@+id/tableLayout">
 
-            <!--<TableRow
-                android:background="#ffffff"
-                android:padding="8dp"
-                android:stretchColumns="*">
-                <TextView
-                    android:layout_gravity="center"
-                    android:textSize="20dp"
-                    android:textColor="#000000"
-                    android:text="1"
-                    android:layout_margin="1dp"/>
-
-                <TextView
-                    android:layout_marginLeft="10dp"
-                    android:layout_gravity="center"
-                    android:textSize="20dp"
-                    android:textColor="#000000"
-                    android:text="임현"
-                    android:layout_margin="1dp"/>
-
-                <CheckBox
-                    android:layout_margin="1dp"
-                    android:layout_marginLeft="10dp"
-                    android:buttonTint="@color/colorPrimaryDark"
-                    android:id="@+id/limBox"/>
-            </TableRow>
-
-            <TableRow
-                android:background="#ffffff"
-                android:padding="8dp"
-                android:stretchColumns="*">
-                <TextView
-                    android:layout_gravity="center"
-                    android:textSize="20dp"
-                    android:textColor="#000000"
-                    android:text="2"
-                    android:layout_margin="1dp"/>
-
-                <TextView
-                    android:layout_marginLeft="10dp"
-                    android:layout_gravity="center"
-                    android:textSize="20dp"
-                    android:textColor="#000000"
-                    android:text="김자훈"
-                    android:layout_margin="1dp"/>
-
-                <CheckBox
-                    android:layout_marginLeft="10dp"
-                    android:layout_margin="1dp"
-                    android:buttonTint="@color/colorPrimaryDark"
-                    android:id="@+id/kimBox"/>
-            </TableRow>-->
-
         </TableLayout>
 
         <LinearLayout
