@@ -11,17 +11,17 @@ import java.util.LinkedHashMap;
 class genesisblock_header implements Serializable{
     private String ver;
     private int index;
-    private float time;
-    private float deadline;
+    private long time;
+    private long deadline;
 
-    public genesisblock_header(String ver, int index, float time, float deadline) {
+    public genesisblock_header(String ver, int index, long time, long deadline) {
         super();
         this.ver = ver;
         this.index = index;
         this.time = time;
         this.deadline = deadline;
     }
-    public genesisblock_header(String ver, float deadline) {
+    public genesisblock_header(String ver, long deadline) {
         super();
         this.ver = ver;
         this.index = 1;
@@ -32,13 +32,13 @@ class genesisblock_header implements Serializable{
     public int getIndex() {
         return index;
     }
-    public float getTime() {
+    public long getTime() {
         return time;
     }
     public String getVer() {
         return ver;
     }
-    public float getDeadline() {
+    public long getDeadline() {
         return deadline;
     }
 
@@ -116,11 +116,11 @@ class block_header implements Serializable{
     private String ver;
     private int index;
     private int proof;
-    private float time;
+    private long time;
     private String previous_hash;
     private String merkle_root;
 
-    public block_header(String ver, int index, int proof, float time, String previous_hash, String merkle_root) {
+    public block_header(String ver, int index, int proof, long time, String previous_hash, String merkle_root) {
         super();
         this.ver = ver;
         this.index = index;
@@ -129,7 +129,7 @@ class block_header implements Serializable{
         this.previous_hash = previous_hash;
         this.merkle_root = merkle_root;
     }
-    public block_header(String ver, int index, float time, String previous_hash, String merkle_root) {
+    public block_header(String ver, int index, long time, String previous_hash, String merkle_root) {
         super();
         this.ver = ver;
         this.index = index;
@@ -147,7 +147,7 @@ class block_header implements Serializable{
     public int getProof() {
         return proof;
     }
-    public float getTime() {
+    public long getTime() {
         return time;
     }
     public String getPrevious_hash() {
@@ -379,7 +379,7 @@ class vote_block {
             }
     }
 
-    public static float deadline(int year, int month, int day, int hour) {
+    public static long deadline(int year, int month, int day, int hour) {
         Calendar c = Calendar.getInstance();
         if(year < c.get(Calendar.YEAR)) return 0;
         if(month > 12 || month < 1) return 0;
