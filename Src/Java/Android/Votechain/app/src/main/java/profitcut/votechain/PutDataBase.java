@@ -44,7 +44,7 @@ public class PutDataBase extends AppCompatActivity {
         }
     }
 
-    public void insertChain(String name, int idx, long deadline, String subject, String constructor, String ver, long time, int proof, String previous_hash, String merkle_root, String block_hash) {
+    public void insertChain(String name, int idx, float deadline, String subject, String constructor, String ver, float time, int proof, String previous_hash, String merkle_root, String block_hash) {
         ContentValues recordValues = new ContentValues();
         String sql = "Insert into "+name+" values (" +
                 idx + ", "+

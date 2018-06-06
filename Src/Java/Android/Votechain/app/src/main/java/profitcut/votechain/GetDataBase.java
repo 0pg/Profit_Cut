@@ -60,7 +60,7 @@ public class GetDataBase extends AppCompatActivity {
         }
         array.add(new genesisblock(c1.getString(c1.getColumnIndex("block_hash")), c1.getString(c1.getColumnIndex("subject")),
                 selectCandidates(myApp.subject+"_candidates"), new genesisblock_header(c1.getString(c1.getColumnIndex("ver")), c1.getInt(c1.getColumnIndex("idx")),
-                c1.getLong(c1.getColumnIndex("time")), c1.getLong(c1.getColumnIndex("deadline")))));
+                c1.getFloat(c1.getColumnIndex("time")), c1.getFloat(c1.getColumnIndex("deadline")))));
         while(c1.moveToNext()){
             array.add(new block(c1.getString(c1.getColumnIndex("block_hash")),
                     selectTransactionPool(myApp.subject, c1.getInt(c1.getColumnIndex("idx"))),
@@ -68,7 +68,7 @@ public class GetDataBase extends AppCompatActivity {
                     , new block_header(c1.getString(c1.getColumnIndex("ver"))
                     , c1.getInt(c1.getColumnIndex("idx"))
                     , c1.getInt(c1.getColumnIndex("proof"))
-                    , c1.getLong(c1.getColumnIndex("time"))
+                    , c1.getFloat(c1.getColumnIndex("time"))
                     , c1.getString(c1.getColumnIndex("previous_hash"))
                     ,c1.getString(c1.getColumnIndex("merkle_root")))));
 

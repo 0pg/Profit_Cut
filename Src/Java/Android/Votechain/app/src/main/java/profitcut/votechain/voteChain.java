@@ -11,34 +11,34 @@ import java.util.LinkedHashMap;
 class genesisblock_header implements Serializable{
     private String ver;
     private int index;
-    private long time;
-    private long deadline;
+    private float time;
+    private float deadline;
 
-    public genesisblock_header(String ver, int index, long time, long deadline) {
+    public genesisblock_header(String ver, int index, float time, float deadline) {
         super();
         this.ver = ver;
         this.index = index;
         this.time = time;
         this.deadline = deadline;
     }
-    public genesisblock_header(String ver, long deadline) {
+    public genesisblock_header(String ver, float deadline) {
         super();
         this.ver = ver;
         this.index = 1;
-        this.time = Calendar.getInstance().getTimeInMillis()/1000 ;
+        this.time = Calendar.getInstance().getTimeInMillis() / 1000;
         this.deadline = deadline;
     }
 
     public int getIndex() {
         return index;
     }
-    public long getTime() {
+    public float getTime() {
         return time;
     }
     public String getVer() {
         return ver;
     }
-    public long getDeadline() {
+    public float getDeadline() {
         return deadline;
     }
 
@@ -116,11 +116,11 @@ class block_header implements Serializable{
     private String ver;
     private int index;
     private int proof;
-    private long time;
+    private float time;
     private String previous_hash;
     private String merkle_root;
 
-    public block_header(String ver, int index, int proof, long time, String previous_hash, String merkle_root) {
+    public block_header(String ver, int index, int proof, float time, String previous_hash, String merkle_root) {
         super();
         this.ver = ver;
         this.index = index;
@@ -129,7 +129,7 @@ class block_header implements Serializable{
         this.previous_hash = previous_hash;
         this.merkle_root = merkle_root;
     }
-    public block_header(String ver, int index, long time, String previous_hash, String merkle_root) {
+    public block_header(String ver, int index, float time, String previous_hash, String merkle_root) {
         super();
         this.ver = ver;
         this.index = index;
@@ -147,7 +147,7 @@ class block_header implements Serializable{
     public int getProof() {
         return proof;
     }
-    public long getTime() {
+    public float getTime() {
         return time;
     }
     public String getPrevious_hash() {
@@ -160,8 +160,10 @@ class block_header implements Serializable{
     public void setMerkle_root(String merkle_root) {
         this.merkle_root = merkle_root;
     }
-    public void setTime(long time){this.time = time;}
-    public void setProof(int proof) { this.proof += proof;}
+    public void setProof(int proof) {
+        this.proof += proof;
+        this.time = Calendar.getInstance().getTimeInMillis() / 1000;
+    }
     public String header() {
         return ver + index + proof + time + previous_hash + merkle_root;
     }
@@ -341,11 +343,11 @@ class vote_block {
         block_header block_h = block.getBlock_h();
         if(chain.size() >= 2) {
             block_header last_h = last_block(chain).getBlock_h();
-            if(block_h.getTime() > genesis_h.getDeadline()) {System.out.println(1);return false;}
-            if(block_h.getIndex() != last_h.getIndex()+1) {System.out.println(2);return false;}
-            if(!valid_proof(block_h)) {System.out.println(3);return false;}
-            if(!block_h.getPrevious_hash().equals(hash(last_h.header()))) {System.out.println(4);return false;}
-            if(block_h.getTime() <= last_h.getTime()) {System.out.println(5);return false;}
+            if(block_h.getTime() > genesis_h.getDeadline()) {return false;}
+            if(block_h.getIndex() != last_h.getIndex()+1) {return false;}
+            if(!valid_proof(block_h)) {return false;}
+            if(!block_h.getPrevious_hash().equals(hash(last_h.header()))) {return false;}
+            if(!hash(block_h.header()).equals(block.getBlock_hash())) {return false;}
 
             return true;
         }
@@ -355,7 +357,6 @@ class vote_block {
             if(!valid_proof(block_h)) { System.out.println(3);return false;}
             if(!block_h.getPrevious_hash().equals(hash(genesis_h.header()))) {System.out.println(4); return false;}
             if(!hash(block_h.header()).equals(block.getBlock_hash())) {System.out.println(5); return false;}
-            if(block_h.getTime() <= genesis_h.getTime()) {System.out.println(5);return false;}
 
             return true;
         }
@@ -370,22 +371,22 @@ class vote_block {
 
     public static boolean valid_proof(block_header block_h) {
             try {
-//                block_h.setTime(Calendar.getInstance().getTimeInMillis()/1000);
-                if (hash(block_h.header()).substring(0, 5).equals("00000")) return true;
+           //     String guess_hash = hash(block_h.toString());
+                if (hash(block_h.header()).substring(0, 4).equals("0000")) return true;
                 else return false;
             } catch (NullPointerException e) {
                 return false;
             }
     }
 
-    public static long deadline(int year, int month, int day, int hour) {
+    public static float deadline(int year, int month, int day, int hour) {
         Calendar c = Calendar.getInstance();
         if(year < c.get(Calendar.YEAR)) return 0;
         if(month > 12 || month < 1) return 0;
         if(day > 31 || day < 1) return 0;
         if(hour > 23 || hour < 0) return 0;
         c.set(year, month, day, hour, 0, 0);
-        return c.getTimeInMillis() ;
+        return c.getTimeInMillis() / 1000;
     }
 
     public void transaction_record() {

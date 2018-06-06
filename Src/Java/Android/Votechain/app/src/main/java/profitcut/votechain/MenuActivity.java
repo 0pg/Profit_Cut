@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.ServerSocket;
 import java.net.SocketException;
-import java.net.StandardSocketOptions;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -90,10 +89,7 @@ public class MenuActivity extends AppCompatActivity {
         HashMap<String, PublicKey> users = myApp.users;
         ArrayList<Object> chain = myApp.chain;
         myApp.flag = true;
-        for(Object b : myApp.chain) {
-            if(b instanceof block)
-            Toast.makeText(getApplicationContext(), String.valueOf(((block) b).getBlock_h().getTime()) , Toast.LENGTH_LONG);
-        }
+
         Toast.makeText(getApplicationContext(), "체인 정보 저장하는 중...", Toast.LENGTH_LONG).show();
         PutDataBase pd = new PutDataBase(dh);
         db.beginTransaction();
@@ -131,19 +127,18 @@ public class MenuActivity extends AppCompatActivity {
         db.endTransaction();
         myApp.ss.setStopped(true);
         Thread.sleep(1500);
-        System.out.println(myApp.tmp);
         Intent ParticipationIntent = new Intent(MenuActivity.this, VoteParticipationActivity.class);
         startActivity(ParticipationIntent);
     }
 
     private void createBlock() throws InterruptedException {
         if (myApp.chain.get(myApp.chain.size() - 1) instanceof genesisblock) {
-            myApp.bh = new block_header("V.1.0.0", myApp.chain.size() + 1,Calendar.getInstance().getTimeInMillis()/1000,
+            myApp.bh = new block_header("V.1.0.0", myApp.chain.size() + 1,Calendar.getInstance().getTimeInMillis() / 1000,
                     ((genesisblock) myApp.chain.get(myApp.chain.size() - 1)).getBlock_hash(),
                     myApp.merkle_tree.get(1));
 
         } else {
-            myApp.bh = new block_header("V.1.0.0", myApp.chain.size() + 1, Calendar.getInstance().getTimeInMillis()/1000,
+            myApp.bh = new block_header("V.1.0.0", myApp.chain.size() + 1, Calendar.getInstance().getTimeInMillis() / 1000,
                     ((block) myApp.chain.get(myApp.chain.size() - 1)).getBlock_hash(),
                     myApp.merkle_tree.get(1));
         }
@@ -159,16 +154,12 @@ public class MenuActivity extends AppCompatActivity {
 
     public void hashing(block_header bh) {
         try {
-            System.out.println("hash");
             ArrayList<HashMap> current_transactions = (ArrayList<HashMap>) myApp.current_transactions.clone();
             HashMap<Integer, String> merkle = (HashMap<Integer, String>) myApp.merkle_tree.clone();
             bh.setMerkle_root(merkle.get(1));
             block b = new block(current_transactions, merkle, bh);
             System.out.println(b.getBlock_hash());
-
             if (myApp.vb.valid_block(b, myApp.chain)) {
-                System.out.println(b.getBlock_hash());
-                System.out.println(b.getBlock_h().getTime());
                 myApp.chain.add(b);
                 myApp.merkle_tree.clear();
                 myApp.current_transactions.clear();
@@ -193,16 +184,14 @@ public class MenuActivity extends AppCompatActivity {
                 }
             }
         } catch (NullPointerException e) {
+
         }
     }
 
     class pow extends  Thread {
-        Calendar c = Calendar.getInstance();
         public void run() {
             while(!myApp.vb.valid_proof(myApp.bh) && !myApp.flag) {
-                    myApp.bh.setProof(1);
-                    myApp.bh.setTime(c.getTimeInMillis()/1000);
-                    myApp.tmp++;
+                myApp.bh.setProof(1);
             }
         }
     }
