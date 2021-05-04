@@ -63,3 +63,7 @@
 
 ### 안드로이드
   리눅스 커널을 기반으로 구글에서 제작한 스마트폰과 같은 플랫폼의 모바일 운영 체제와 미들웨어 및 중요 애플리케이션이 포함된 소프트웨어 집합
+  
+  
+## 결과 보고서
+- [결과 보고서.pdf](https://github.com/0pg/Profit_Cut/blob/master/Doc/%EA%B2%B0%EA%B3%BC%20%EB%B3%B4%EA%B3%A0%EC%84%9C/2018%EB%85%84%20%EC%8A%A4%ED%84%B0%EB%94%94%EC%83%81%EC%83%9D%ED%94%8C%EB%9F%AC%EC%8A%A4%20%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8%20%EA%B2%B0%EA%B3%BC%20%EB%B3%B4%EA%B3%A0%EC%84%9C_%EC%9D%B5%EC%A0%88.pdf)
